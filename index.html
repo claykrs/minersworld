@@ -896,17 +896,6 @@
         }
       }
 
-      closeAllPanels() {
-          // Close Sidebar
-          const sb = document.getElementById('sidebar');
-          const overlay = document.getElementById('mobile-overlay');
-          if (sb && !sb.classList.contains('-translate-x-full')) {
-              sb.classList.add('-translate-x-full');
-              if(overlay) overlay.classList.add('hidden');
-          }
-          // Close other potential panels if added later
-      }
-
       toggleFavoritesMode() {
         this.favoritesMode = !this.favoritesMode;
         const btn = document.getElementById('btn-favs');
@@ -1943,20 +1932,38 @@
 
       // Panel Management
       closeAllPanels() {
+        // Safe Helper
+        const closePanel = (id) => {
+           const el = document.getElementById(id);
+           if(el) el.classList.add('translate-x-full');
+        };
+        const hideOverlay = (id) => {
+           const el = document.getElementById(id);
+           if(el) {
+               el.classList.add('hidden');
+               el.classList.remove('opacity-100');
+           }
+        };
+
         // Close Depth Simulator
-        document.getElementById('depth-simulator').classList.add('translate-x-full');
-        document.getElementById('depth-overlay').classList.add('hidden');
-        document.getElementById('depth-overlay').classList.remove('opacity-100');
+        closePanel('depth-simulator');
+        hideOverlay('depth-overlay');
 
         // Close Analytics
-        document.getElementById('analytics-panel').classList.add('translate-x-full');
-        document.getElementById('analytics-overlay').classList.add('hidden');
-        document.getElementById('analytics-overlay').classList.remove('opacity-100');
+        closePanel('analytics-panel');
+        hideOverlay('analytics-overlay');
 
         // Close Gallery
-        document.getElementById('gallery-panel').classList.add('translate-x-full');
-        document.getElementById('gallery-overlay').classList.add('hidden');
-        document.getElementById('gallery-overlay').classList.remove('opacity-100');
+        closePanel('gallery-panel');
+        hideOverlay('gallery-overlay');
+
+        // Close Sidebar
+        const sb = document.getElementById('sidebar');
+        if (sb && !sb.classList.contains('-translate-x-full')) {
+            sb.classList.add('-translate-x-full');
+        }
+        const mobOver = document.getElementById('mobile-overlay');
+        if(mobOver) mobOver.classList.add('hidden');
 
         document.body.style.overflow = '';
       }
