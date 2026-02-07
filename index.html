@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>Miners World: Darkwired</title>
   <script>
-    // AUTOMATIC FIX: Set authorization key to prevent lockout
     if (localStorage.getItem("mw_authorized") !== "true") {
         localStorage.setItem("mw_authorized", "true");
         console.log("Miners World: Authorization patched automatically.");
@@ -16,7 +15,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   
   <script>
     tailwind.config = {
@@ -29,25 +28,16 @@
           },
           colors: {
             slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' },
-            rarity: {
-              Default: '#64748b',
-              Common: '#cbd5e1',
-              Uncommon: '#4ade80',
-              Rare: '#3b82f6',
-              Epic: '#a855f7',
-              Legendary: '#fbbf24',
-              Mythic: '#ef4444',
-              Ethereal: '#ec4899',
-              Celestial: '#06b6d4',
-            }
           },
           animation: {
-            'fade-in': 'fadeIn 0.3s ease-out',
-            'slide-up': 'slideUp 0.4s ease-out',
+            'fade-in': 'fadeIn 0.3s ease-out forwards',
+            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'pulse-soft': 'pulseSoft 3s infinite',
           },
           keyframes: {
             fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-            slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+            slideUp: { '0%': { transform: 'translateY(15px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+            pulseSoft: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0.7' } }
           }
         }
       }
@@ -55,691 +45,389 @@
   </script>
 
   <style>
+    :root {
+      --scrollbar-width: 6px;
+    }
 
+    body {
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    /* Modern Scrollbar */
+    ::-webkit-scrollbar { width: var(--scrollbar-width); height: var(--scrollbar-width); }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.5); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 0.8); }
 
-    /* Glassmorphism Utilities */
+    /* Glassmorphism Refined */
     .glass {
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
     
     .glass-strong {
-      background: rgba(2, 6, 23, 0.85);
-      backdrop-filter: blur(16px);
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(2, 6, 23, 0.9);
+      backdrop-filter: blur(24px);
+      border-right: 1px solid rgba(255, 255, 255, 0.03);
     }
 
-    /* Rarity Glows */
-    .glow-hover { transition: all 0.3s ease; }
-    .glow-hover:hover { box-shadow: 0 0 20px -5px var(--glow-color); border-color: var(--glow-color); transform: translateY(-4px); }
-
-/* Zenith Rarity - "The Void" Effect */
-.rarity-zenith { 
-    color: #ffffff !important; 
-    background: #000000; 
-    padding: 2px 8px; 
-    border-radius: 4px;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); 
-    border: 1px solid #333;
-    font-weight: 900;
-}
-
-    /* Card Hover Glow */
-    .card-hover-effect {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Interactive Elements */
+    .clickable {
+        transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
     }
-    .card-hover-effect:hover {
-      border-color: var(--glow-color) !important;
-      box-shadow: 0 0 25px -5px var(--glow-color), 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+    .clickable:active {
+        transform: scale(0.97);
     }
-    
+
+    /* Card Glows */
+    .card-glow {
+        position: relative;
+        isolation: isolate;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255,255,255,0.03);
+    }
+    .card-glow:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 30px -10px rgba(0,0,0,0.5), 
+                    0 0 20px -5px var(--glow-color);
+        border-color: var(--glow-color);
+        z-index: 10;
+    }
+    .card-glow::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(800px circle at var(--mouse-x, center) var(--mouse-y, center), rgba(255,255,255,0.03), transparent 40%);
+        opacity: 0;
+        transition: opacity 0.5s;
+        z-index: -1;
+    }
+    .card-glow:hover::before {
+        opacity: 1;
+    }
+
+    /* Divine Rarity Special Styling */
+    .text-divine {
+        color: #e2e8f0 !important;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Depth Simulator Custom */
+    .depth-layer {
+      position: relative;
+      transition: all 0.2s ease;
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0) 100%);
+    }
+    .depth-layer:hover {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(15, 23, 42, 0) 100%);
+      padding-left: 1.25rem !important; /* Visual indentation on hover */
+    }
+    .depth-gradient-bar {
+        background: linear-gradient(to bottom, #0ea5e9, #22d3ee, #10b981, #f59e0b, #ef4444, #7c3aed);
+    }
+
     /* Utility */
-    .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    .text-shadow-sm { text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
 
-    /* Depth Simulator Styles */
-    .depth-layer {
-      position: relative;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      margin-left: 8px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      border: 1px solid transparent;
-    }
-    .depth-layer:hover {
-      transform: translateX(-4px);
-      border-color: rgba(99, 102, 241, 0.5);
-    }
-    .depth-layer.active {
-      border-color: #22d3ee;
-      box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
-    }
-    .depth-indicator {
-      position: absolute;
-      left: -26px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #22d3ee;
-      box-shadow: 0 0 8px #22d3ee, 0 0 20px rgba(34, 211, 238, 0.4);
-      animation: pulse-depth 2s infinite;
-      z-index: 10;
-    }
-    @keyframes pulse-depth {
-      0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
-      50% { opacity: 0.5; transform: translateY(-50%) scale(1.2); }
-    }
-    .ore-node {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 600;
-      margin: 2px;
-      border: 1px solid currentColor;
-      background: rgba(0,0,0,0.3);
-      transition: all 0.2s;
-    }
-    .ore-node:hover {
-      transform: scale(1.1);
-      z-index: 10;
-    }
-    .depth-ruler {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 40px;
-      background: linear-gradient(to bottom, 
-        #0ea5e9 0%, 
-        #22d3ee 20%, 
-        #10b981 40%, 
-        #f59e0b 60%, 
-        #ef4444 80%, 
-        #7c3aed 100%
-      );
-      opacity: 0.3;
-      border-radius: 4px 0 0 4px;
-    }
+    /* Selection */
+    ::selection { background: rgba(99, 102, 241, 0.3); color: #fff; }
 
-    /* Analytics Styles */
-    .analytics-card {
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid rgba(71, 85, 105, 0.5);
-      border-radius: 12px;
-      padding: 16px;
-      transition: all 0.3s ease;
-    }
-    .analytics-card:hover {
-      border-color: rgba(99, 102, 241, 0.5);
-      transform: translateY(-2px);
-    }
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .bar-chart {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      height: 120px;
-      padding: 16px 0;
-    }
-    .bar {
-      flex: 1;
-      border-radius: 4px 4px 0 0;
-      transition: all 0.3s ease;
-      position: relative;
-      min-width: 30px;
-    }
-    .bar:hover {
-      opacity: 0.8;
-      transform: scaleY(1.05);
-    }
-    .bar-label {
-      position: absolute;
-      bottom: -20px;
-      left: 50%;
-      transform: translateX(-50%) rotate(-45deg);
-      font-size: 10px;
-      white-space: nowrap;
-      color: #94a3b8;
-    }
-    .bar-value {
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 11px;
-      font-weight: 600;
-      color: white;
-    }
-    .pie-chart {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      background: conic-gradient(
-        #64748b 0deg var(--default-deg),
-        #cbd5e1 var(--default-deg) var(--common-deg),
-        #4ade80 var(--common-deg) var(--uncommon-deg),
-        #3b82f6 var(--uncommon-deg) var(--rare-deg),
-        #a855f7 var(--rare-deg) var(--epic-deg),
-        #fbbf24 var(--epic-deg) var(--legendary-deg),
-        #ef4444 var(--legendary-deg) var(--mythic-deg),
-        #ec4899 var(--mythic-deg) var(--ethereal-deg),
-        #06b6d4 var(--ethereal-deg) 360deg
-      );
-      position: relative;
-      margin: 0 auto;
-    }
-    .pie-center {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80px;
-      height: 80px;
-      background: #0f172a;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
-      color: white;
-    }
-    .heatmap-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-    .heatmap-cell {
-      aspect-ratio: 1;
-      border-radius: 4px;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    .heatmap-cell:hover {
-      transform: scale(1.2);
-      z-index: 10;
-      box-shadow: 0 0 10px rgba(255,255,255,0.3);
-    }
-
-    /* Gallery Styles */
-    .gallery-item {
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid rgba(71, 85, 105, 0.5);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    .gallery-item:hover {
-      border-color: rgba(16, 185, 129, 0.5);
-      transform: translateY(-2px);
-    }
-    .gallery-image {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      cursor: pointer;
-    }
-    .gallery-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-    .gallery-delete {
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .gallery-item:hover .gallery-delete {
-      opacity: 1;
-    }
-    .lightbox {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.95);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
-      object-fit: contain;
-      border-radius: 8px;
-    }
-
-    /* Report Modal Styles */
-    #report-modal input:focus, #report-modal select:focus, #report-modal textarea:focus {
-      box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
-    }
-
-    #report-file-section {
-      animation: slideDown 0.3s ease;
-    }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Theme Variables */
-    :root[data-theme="light"] {
-      --bg-primary: #e8e8e8;
-      --bg-secondary: #d4d4d4;
-      --bg-card: #c9c9c9;
-      --bg-sidebar: rgba(212, 212, 212, 0.98);
-      --text-primary: #0a0a0a;
-      --text-secondary: #262626;
-      --text-muted: #404040;
-      --border-color: #a3a3a3;
-      --accent-glow: rgba(99, 102, 241, 0.2);
-    }
-
-    :root[data-theme="dark-blue"] {
-      --bg-primary: #020617;
-      --bg-secondary: #0f172a;
-      --bg-card: #151e2e;
-      --bg-sidebar: rgba(2, 6, 23, 0.95);
-      --text-primary: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --text-muted: #64748b;
-      --border-color: #1e293b;
-      --accent-glow: rgba(99, 102, 241, 0.3);
-    }
-
-    :root[data-theme="black"] {
-      --bg-primary: #000000;
-      --bg-secondary: #0a0a0a;
-      --bg-card: #111111;
-      --bg-sidebar: rgba(0, 0, 0, 0.95);
-      --text-primary: #ffffff;
-      --text-secondary: #a1a1aa;
-      --text-muted: #71717a;
-      --border-color: #27272a;
-      --accent-glow: rgba(255, 255, 255, 0.1);
-    }
-
-    /* Theme overrides */
-    [data-theme="light"] body { background-color: var(--bg-primary); color: var(--text-primary); }
-    [data-theme="light"] .glass-strong { background: var(--bg-sidebar); border-color: var(--border-color); border-right-color: var(--border-color) !important; }
-    [data-theme="light"] .bg-slate-950 { background-color: var(--bg-primary); }
-    [data-theme="light"] .bg-slate-900 { background-color: var(--bg-card); }
-    [data-theme="light"] .bg-slate-900\/50 { background-color: rgba(201, 201, 201, 0.9); }
-    [data-theme="light"] .bg-slate-800 { background-color: #b0b0b0; }
-    [data-theme="light"] .border-slate-800 { border-color: var(--border-color); }
-    [data-theme="light"] .border-slate-700 { border-color: #9e9e9e; }
-    [data-theme="light"] .text-slate-100 { color: #262626 !important; }
-    [data-theme="light"] .text-slate-200 { color: #262626 !important; }
-    [data-theme="light"] .text-slate-300 { color: #404040 !important; }
-    [data-theme="light"] .text-slate-400 { color: #525252 !important; }
-    [data-theme="light"] .text-slate-500 { color: #525252 !important; }
-    [data-theme="light"] .text-slate-600 { color: #525252 !important; }
-    [data-theme="light"] .text-white { color: #262626 !important; }
-    [data-theme="light"] .group-hover\:text-white:hover { color: #262626 !important; }
-    [data-theme="light"] .text-slate-950 { color: #262626 !important; }
-    [data-theme="light"] .text-slate-950 { color: #0a0a0a; }
-    [data-theme="light"] .hover\:bg-slate-800:hover { background-color: #b0b0b0; }
-    [data-theme="light"] #rarity-list button { color: #525252 !important; background-color: #e8e8e8; border-color: #a3a3a3; }
-    [data-theme="light"] #rarity-list button.border-white { background-color: #d4d4d4; color: #262626 !important; }
-    [data-theme="light"] .hover\:bg-slate-700:hover { background-color: #a0a0a0; }
-    [data-theme="light"] .hover\:text-white:hover { color: #262626 !important; }
-    [data-theme="light"] input { background-color: #f5f5f5; border-color: #9e9e9e; color: #0a0a0a; }
-    [data-theme="light"] input::placeholder { color: #737373; }
-    [data-theme="light"] select { background-color: #f5f5f5; border-color: #9e9e9e; color: #0a0a0a; }
-    [data-theme="light"] header { background-color: rgba(232, 232, 232, 0.95) !important; border-color: var(--border-color) !important; }
-    [data-theme="light"] aside { border-color: var(--border-color) !important; }
-    [data-theme="light"] aside h1 { color: #262626 !important; }
-    [data-theme="light"] aside h3 { color: #404040 !important; }
-    [data-theme="light"] aside .text-slate-200 { color: #404040 !important; }
-    [data-theme="light"] aside .text-slate-300 { color: #525252 !important; }
-    [data-theme="light"] aside .text-slate-400 { color: #525252 !important; }
-    [data-theme="light"] aside .text-slate-500 { color: #525252 !important; }
-    [data-theme="light"] aside button { color: #404040; }
-    [data-theme="light"] aside button:hover { color: #262626; }
-    [data-theme="light"] #mobile-overlay { background-color: rgba(0, 0, 0, 0.6); }
-    [data-theme="light"] .glass { background: rgba(201, 201, 201, 0.8); border-color: var(--border-color); }
-    [data-theme="light"] .bg-slate-950\/80 { background-color: rgba(232, 232, 232, 0.95) !important; }
-    [data-theme="light"] .border-b-slate-800 { border-bottom-color: var(--border-color) !important; }
-    [data-theme="light"] .border-t-slate-800 { border-top-color: var(--border-color) !important; }
-    [data-theme="light"] .border-slate-700 { border-color: #9e9e9e !important; }
-    [data-theme="light"] #modal-panel { background-color: #d4d4d4; border-color: #a3a3a3; }
-    [data-theme="light"] #modal-panel .bg-slate-950 { background-color: #c9c9c9; }
-    [data-theme="light"] #modal-panel .bg-slate-950\/50 { background-color: rgba(201, 201, 201, 0.8); }
-    [data-theme="light"] #modal-panel .border-slate-800 { border-color: #a3a3a3; }
-    [data-theme="light"] #modal-panel h2 { color: #262626 !important; }
-    [data-theme="light"] #modal-panel .text-white { color: #262626 !important; }
-    [data-theme="light"] #modal-panel .text-slate-200 { color: #404040 !important; }
-    [data-theme="light"] #modal-panel .text-slate-300 { color: #525252 !important; }
-    [data-theme="light"] #modal-panel .text-slate-500 { color: #525252 !important; }
-    [data-theme="light"] #modal-panel .text-slate-600 { color: #525252 !important; }
-    [data-theme="light"] #toast { background-color: #262626; color: #ffffff; }
-    [data-theme="light"] #results-grid > div { background-color: #d4d4d4; border-color: #a3a3a3; }
-    [data-theme="light"] #results-grid > div h3 { color: #262626 !important; }
-    [data-theme="light"] #results-grid > div .text-slate-100 { color: #262626 !important; }
-    [data-theme="light"] #results-grid > div .text-slate-200 { color: #404040 !important; }
-    [data-theme="light"] #results-grid > div .text-slate-300 { color: #525252 !important; }
-    [data-theme="light"] #results-grid > div .text-slate-400 { color: #525252 !important; }
-    [data-theme="light"] #results-grid > div .text-slate-500 { color: #525252 !important; }
-    [data-theme="light"] #empty-state svg { color: #737373; }
-    [data-theme="light"] #empty-state .text-slate-300 { color: #262626; }
-    [data-theme="light"] #empty-state .text-slate-500 { color: #525252; }
-
-    [data-theme="black"] body { background-color: var(--bg-primary); color: var(--text-primary); }
-    [data-theme="black"] .glass-strong { background: var(--bg-sidebar); border-color: var(--border-color); border-right-color: var(--border-color) !important; }
-    [data-theme="black"] .glass { background: rgba(17, 17, 17, 0.9); border-color: var(--border-color); }
-    [data-theme="black"] .bg-slate-950 { background-color: var(--bg-primary); }
-    [data-theme="black"] .bg-slate-900 { background-color: var(--bg-card); }
-    [data-theme="black"] .bg-slate-900\/50 { background-color: rgba(17, 17, 17, 0.9); }
-    [data-theme="black"] .bg-slate-800 { background-color: #1a1a1a; }
-    [data-theme="black"] .border-slate-800 { border-color: var(--border-color); }
-    [data-theme="black"] .border-slate-700 { border-color: #333333; }
-    [data-theme="black"] .text-slate-200 { color: var(--text-primary); }
-    [data-theme="black"] .text-slate-300 { color: var(--text-secondary); }
-    [data-theme="black"] .text-slate-400 { color: var(--text-muted); }
-    [data-theme="black"] .text-slate-500 { color: #52525b; }
-    [data-theme="black"] .text-slate-950 { color: #000000; }
-    [data-theme="black"] .hover\:bg-slate-800:hover { background-color: #1a1a1a; }
-    [data-theme="black"] .hover\:bg-slate-700:hover { background-color: #27272a; }
-    [data-theme="black"] .hover\:text-white:hover { color: #ffffff; }
-    [data-theme="black"] header { background-color: rgba(0, 0, 0, 0.95) !important; border-color: var(--border-color) !important; }
-    [data-theme="black"] aside { border-color: var(--border-color) !important; }
-    [data-theme="black"] input { background-color: #111111; border-color: #333333; color: #ffffff; }
-    [data-theme="black"] input::placeholder { color: #71717a; }
-    [data-theme="black"] select { background-color: #111111; border-color: #333333; color: #ffffff; }
-    [data-theme="black"] .bg-slate-950\/80 { background-color: rgba(0, 0, 0, 0.95) !important; }
-    [data-theme="black"] #modal-panel { background-color: #0a0a0a; border-color: #27272a; }
-    [data-theme="black"] #modal-panel .bg-slate-950 { background-color: #111111; }
-    [data-theme="black"] #modal-panel .bg-slate-950\/50 { background-color: rgba(17, 17, 17, 0.9); }
-    [data-theme="black"] #modal-panel .border-slate-800 { border-color: #27272a; }
-    [data-theme="black"] #results-grid > div { background-color: var(--bg-card); border-color: var(--border-color); }
-    [data-theme="black"] #empty-state svg { color: #52525b; }
   </style>
-<base target="_blank">
 <base target="_blank">
 </head>
 
-<body class="bg-slate-950 text-slate-200 h-screen flex selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#050608] text-slate-300 h-screen flex overflow-hidden font-sans selection:bg-indigo-500/30">
 
-  <div id="mobile-overlay" class="fixed inset-0 bg-black/80 z-40 hidden backdrop-blur-sm transition-opacity" onclick="app.toggleMobileMenu()"></div>
+  <!-- Mobile Overlay -->
+  <div id="mobile-overlay" class="fixed inset-0 bg-black/80 z-40 hidden backdrop-blur-sm transition-all duration-300" onclick="app.toggleMobileMenu()"></div>
 
-  <aside id="sidebar" class="fixed inset-y-0 left-0 w-80 glass-strong z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col h-full shadow-2xl">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-80 glass-strong z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col h-full shadow-2xl border-r border-slate-800/50">
     
-    <div class="p-6 border-b border-slate-800 shrink-0">
-      <div class="flex items-center gap-3 mb-1">
-        <div class="w-8 h-8 rounded bg-gradient-to-tr from-amber-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-        </div>
-        <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent">MINERS WORLD</h1>
+    <!-- Sidebar Header -->
+    <div class="p-6 shrink-0 relative overflow-hidden">
+      <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+          <svg class="w-32 h-32 text-indigo-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 19h20L12 2zm0 3.5l6.5 11.5h-13L12 5.5z"/></svg>
       </div>
-      <p class="text-xs text-slate-500 mono pl-11">v3.0.1 • LATEST UPDATED</p>
+      <div class="flex items-center gap-4 relative z-10">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 ring-1 ring-white/10">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+        </div>
+        <div>
+            <h1 class="text-xl font-bold tracking-tight text-white leading-none">MINERS WORLD</h1>
+            <p class="text-[10px] font-mono text-slate-500 mt-1 tracking-widest uppercase">Database v3.0.3</p>
+        </div>
+      </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-4 space-y-8 custom-scrollbar">
+    <!-- Navigation -->
+    <div class="flex-1 overflow-y-auto px-4 py-2 space-y-6 custom-scrollbar">
       
-      <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-800">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex justify-between">
-          Distribution
-          <span id="total-count" class="text-slate-200">0 Items</span>
+      <!-- Stats Widget -->
+      <div class="bg-slate-900/40 rounded-2xl p-4 border border-slate-800/60 backdrop-blur-sm">
+        <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 flex justify-between items-center">
+          Overview
+          <span id="total-count" class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px]">Loading...</span>
         </h3>
-        <div id="stats-container" class="space-y-2">
-          </div>
+        <div id="stats-container" class="space-y-2.5">
+            <!-- Stats injected via JS -->
+        </div>
       </div>
 
-      <div>
-        <button id="btn-favs" onclick="app.toggleFavoritesMode()" class="w-full flex items-center justify-between p-3 rounded-lg border border-slate-800 bg-slate-900/30 hover:bg-amber-900/20 hover:border-amber-700/50 transition-all group">
-          <span class="text-sm font-semibold text-slate-300 group-hover:text-amber-400 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-            Show Favorites Only
-          </span>
-          <span id="fav-count-badge" class="bg-amber-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-md opacity-0 transition-opacity">0</span>
-        </button>
-      </div>
+      <!-- Favorites Toggle -->
+      <button id="btn-favs" onclick="app.toggleFavoritesMode()" class="clickable w-full flex items-center justify-between p-3.5 rounded-xl border border-slate-700/50 bg-slate-900/20 hover:bg-slate-800 hover:border-slate-600 transition-all group">
+        <div class="flex items-center gap-3">
+             <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+             </div>
+             <div class="text-left">
+                 <span class="block text-sm font-semibold text-slate-200 group-hover:text-white">Favorites</span>
+                 <span class="text-[10px] text-slate-500">Your saved items</span>
+             </div>
+        </div>
+        <span id="fav-count-badge" class="bg-amber-500 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full opacity-0 transition-opacity">0</span>
+      </button>
 
-      
+      <!-- Layer Filters -->
       <div>
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Filter Rarity</h3>
-        <div id="rarity-list" class="flex flex-wrap gap-2"></div>
-      </div>
-
-      <div>
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Geological Layers</h3>
+        <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 pl-1">Filter Layers</h3>
         <div id="layer-list" class="space-y-1"></div>
       </div>
 
-      
+      <!-- Rarity Filters -->
+      <div>
+        <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 pl-1">Filter Rarity</h3>
+        <div id="rarity-list" class="flex flex-wrap gap-2"></div>
+      </div>
+
   </div>
 
-  <div class="p-4 border-t border-slate-800 bg-slate-900/50 shrink-0 space-y-3">
-      
-<button onclick="app.toggleDepthSimulator()" id="btn-depth-sim" class="mt-3 w-full py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-semibold shadow-lg shadow-cyan-900/20 transition-all flex items-center justify-center gap-2 group">
-      <svg class="w-4 h-4 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-      Depth Simulator
+  <!-- Sidebar Footer -->
+  <div class="p-4 border-t border-slate-800/60 bg-slate-900/30 shrink-0">  
+    <button onclick="app.toggleDepthSimulator()" id="btn-depth-sim" class="clickable w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-bold shadow-lg shadow-cyan-900/20 transition-all flex items-center justify-center gap-2 group ring-1 ring-white/10">
+      <svg class="w-5 h-5 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+      Geological Map
     </button>
   </div>
 </aside>
 
-   <main id="main-wrapper" class="flex-1 flex flex-col h-full relative md:ml-80 transition-all">
-       <header class="h-16 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 shrink-0 z-30">
+   <!-- Main Content -->
+   <main id="main-wrapper" class="flex-1 flex flex-col h-full relative md:ml-80 bg-gradient-to-b from-[#050608] via-[#0a0f1c] to-[#050608]">
+       
+       <!-- Header -->
+       <header class="h-20 border-b border-slate-800/60 bg-[#050608]/80 backdrop-blur-xl flex items-center justify-between px-6 z-30 shrink-0">
       
-      <button onclick="app.toggleMobileMenu()" class="md:hidden p-2 text-slate-400 hover:text-white">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-      </button>
+        <!-- Mobile Toggle -->
+        <button onclick="app.toggleMobileMenu()" class="md:hidden p-2 -ml-2 text-slate-400 hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
-      <div class="flex-1 max-w-xl mx-4 relative">
-        <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <input type="text" id="search-input" placeholder="Search ores, depths, or IDs..." 
-          class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600">
-      </div>
-
-      <div class="flex items-center gap-2">
-        <!-- Theme Toggle -->
-        <div class="bg-slate-900 p-1 rounded-lg border border-slate-800 flex mr-2">
-          <button onclick="app.setTheme('light')" id="theme-light" class="p-1.5 rounded transition-colors" title="Light Theme">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-          </button>
-          <button onclick="app.setTheme('dark-blue')" id="theme-dark-blue" class="p-1.5 rounded bg-indigo-600 text-white transition-colors" title="Dark Blue Theme">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-          </button>
-          <button onclick="app.setTheme('black')" id="theme-black" class="p-1.5 rounded transition-colors" title="Black Theme">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20z"></path></svg>
-          </button>
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-xl relative group mx-4 md:mx-0">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <input type="text" id="search-input" placeholder="Search..." 
+            class="block w-full pl-10 pr-3 py-2.5 border border-slate-800 rounded-xl leading-5 bg-slate-900/50 text-slate-300 placeholder-slate-600 focus:outline-none focus:bg-slate-900 focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 sm:text-sm transition-all shadow-inner">
         </div>
 
-        <div class="bg-slate-900 p-1 rounded-lg border border-slate-800 flex">
-          <button onclick="app.setView('grid')" id="view-grid" class="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-          </button>
-          <button onclick="app.setView('list')" id="view-list" class="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-          </button>
+        <!-- Right Actions -->
+        <div class="flex items-center gap-4 ml-4">
+            
+            <!-- View Toggle -->
+            <div class="hidden sm:flex bg-slate-900/50 p-1 rounded-lg border border-slate-800/60">
+                <button onclick="app.setView('grid')" id="view-grid" class="p-2 rounded-md bg-slate-800 text-white shadow-sm ring-1 ring-white/5 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                </button>
+                <button onclick="app.setView('list')" id="view-list" class="p-2 rounded-md text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
+
+            <!-- Sort Select -->
+            <div class="relative">
+                <select id="sort-select" onchange="app.handleSort()" class="appearance-none bg-slate-900/50 border border-slate-800 text-slate-300 text-sm rounded-xl pl-4 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer hover:bg-slate-800/50 transition-colors font-medium">
+                <option value="rarity_desc">Rarity (Highest)</option>
+                <option value="rarity_asc">Rarity (Lowest)</option>
+                <option value="depth_deep">Depth (Deepest)</option>
+                <option value="depth_shallow">Depth (Shallowest)</option>
+                <option value="name_asc">Name (A-Z)</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </div>
+            </div>
+
         </div>
-
-        <select id="sort-select" onchange="app.handleSort()" class="bg-slate-900 border border-slate-800 text-slate-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer hover:bg-slate-800">
-          <option value="rarity_desc">Rarity (Highest)</option>
-          <option value="rarity_asc">Rarity (Lowest)</option>
-          <option value="depth_deep">Depth (Deepest)</option>
-          <option value="depth_shallow">Depth (Shallowest)</option>
-          <option value="name_asc">Name (A-Z)</option>
-        </select>
-
-        <!-- Support Me button removed -->
-      </div>
     </header>
 
-    <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-      <!-- View Tabs -->
-      <div class="flex justify-start mb-6">
-        <div class="bg-slate-900 p-1.5 rounded-xl border border-slate-800 inline-flex">
-          <button onclick="app.switchView('ores')" id="tab-ores" class="w-28 py-3 rounded-lg text-base font-semibold transition-all bg-indigo-600 text-white">
-            ORES
-          </button>
-          <button onclick="app.switchView('crafts')" id="tab-crafts" class="w-28 py-3 rounded-lg text-base font-semibold transition-all bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700">
-            CRAFTS
-          </button>
-        </div>
-      </div>
-      <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pb-10">
-        </div>
+    <!-- Content Area -->
+    <div id="content-area" class="flex-1 overflow-y-auto px-6 py-8 custom-scrollbar scroll-smooth">
       
-      <div id="empty-state" class="hidden h-full flex flex-col items-center justify-center text-center opacity-60 mt-20">
-        <svg class="w-20 h-20 text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <h3 class="text-xl font-bold text-slate-300">No Ores Found</h3>
-        <p class="text-slate-500">Try adjusting your filters or search query.</p>
-        <button onclick="app.resetFilters()" class="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-slate-300 transition-colors">Clear All Filters</button>
+        <!-- Tab Switcher -->
+      <div class="flex justify-start mb-8">
+        <div class="bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800 inline-flex shadow-inner">
+          <button onclick="app.switchView('ores')" id="tab-ores" class="clickable px-8 py-2.5 rounded-xl text-sm font-bold transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 ring-1 ring-white/10">
+            MINING LOG
+          </button>
+          <button onclick="app.switchView('crafts')" id="tab-crafts" class="clickable px-8 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+            CRAFTING
+          </button>
+        </div>
       </div>
 
+      <!-- Results Grid -->
+      <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20">
+          <!-- Items injected here -->
+      </div>
+      
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden h-full flex flex-col items-center justify-center text-center opacity-60 mt-12 pb-20">
+        <div class="w-24 h-24 bg-slate-900/50 rounded-full flex items-center justify-center mb-6 ring-1 ring-slate-800">
+            <svg class="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <h3 class="text-2xl font-bold text-slate-200 mb-2">No items found</h3>
+        <p class="text-slate-500 max-w-xs mx-auto">We couldn't find anything matching your search. Try changing criteria.</p>
+        <button onclick="app.resetFilters()" class="clickable mt-8 px-6 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm font-semibold text-slate-200 transition-colors border border-slate-700">
+            Clear Filters
+        </button>
+      </div>
 
     </div>
-  <!-- Depth Simulator Panel -->
-  <div id="depth-simulator" class="fixed inset-y-0 right-0 w-96 bg-slate-900/95 backdrop-blur-xl border-l border-slate-700 shadow-2xl transform translate-x-full transition-transform duration-500 z-40 flex flex-col">
-    <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
+  
+  <!-- Improved Depth Map (Was Simulator) -->
+  <div id="depth-simulator" class="fixed inset-y-0 right-0 w-[420px] bg-[#0b0c15] border-l border-slate-800 shadow-2xl transform translate-x-full transition-transform duration-500 ease-in-out z-50 flex flex-col">
+    <!-- Header -->
+    <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-gradient-to-r from-slate-900 to-slate-900/50">
       <div>
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
-          <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-          Depth Simulator
+          <span class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+          </span>
+          Geological Map
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Scroll to explore layers</p>
+        <p class="text-xs text-slate-500 mt-1 pl-10">Select a layer to filter results</p>
       </div>
-      <button onclick="app.toggleDepthSimulator()" class="text-slate-400 hover:text-white transition-colors">
+      <button onclick="app.toggleDepthSimulator()" class="p-2 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-white transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-4 space-y-4" id="depth-content">
-      <!-- Depth meter will be rendered here -->
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-0" id="depth-content">
+      <!-- Injected depth layers -->
     </div>
-
-    <div class="p-4 border-t border-slate-800 bg-slate-950/50">
-      <div class="flex justify-between text-xs text-slate-500 mb-2">
-        <span>Surface</span>
-        <span id="current-depth-display">0m</span>
-        <span>Core</span>
-      </div>
-      <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
-        <div id="depth-progress" class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300" style="width: 0%"></div>
-      </div>
-    </div>
+    
   </div>
 
-  <!-- Depth Simulator Overlay -->
-  <div id="depth-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 hidden opacity-0 transition-opacity duration-300" onclick="app.toggleDepthSimulator()"></div>
+  <div id="depth-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300" onclick="app.toggleDepthSimulator()"></div>
 
-  <!-- Craft Details Modal -->
-  <div id="craft-modal-backdrop" class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0" onclick="if(event.target === this) app.closeCraftModal()">
-    <div id="craft-modal-panel" class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl transform scale-95 transition-all duration-300 overflow-hidden relative max-h-[90vh]">
-      <div id="craft-modal-header-stripe" class="h-2 w-full bg-slate-700"></div>
-
-      <div class="p-8 overflow-y-auto max-h-[calc(90vh-8px)]">
-        <div class="flex justify-between items-start mb-6">
-          <div>
-            <div id="craft-modal-rarity-badge" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 mb-2 border border-slate-700">RARITY</div>
-            <h2 id="craft-modal-title" class="text-3xl font-extrabold text-white leading-tight tracking-tight">Craft Name</h2>
-          </div>
-          <button onclick="app.closeCraftModal()" class="text-slate-500 hover:text-white transition-colors bg-slate-800 p-2 rounded-full">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
-        </div>
-
-        <div class="mb-6">
-          <p id="craft-modal-description" class="text-slate-300 text-lg leading-relaxed">Description</p>
-        </div>
-
-        <div id="craft-modal-requirements" class="space-y-3">
-          <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Required Materials</h3>
-          <!-- Requirements will be rendered here -->
-        </div>
-      </div>
-
-      <div class="bg-slate-950 px-8 py-4 border-t border-slate-800 flex justify-between items-center">
-        <span class="text-xs text-slate-600 mono">MINERS WORLD CRAFTING DATABASE</span>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-backdrop" class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0" onclick="if(event.target === this) app.closeModal()">
-    <div id="modal-panel" class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl transform scale-95 transition-all duration-300 overflow-hidden relative">
+  <!-- Item Details Modal -->
+  <div id="modal-backdrop" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0" onclick="if(event.target === this) app.closeModal()">
+    <div id="modal-panel" class="bg-[#0f111a] border border-slate-700/50 w-full max-w-2xl rounded-2xl shadow-2xl transform scale-95 transition-all duration-300 overflow-hidden relative ring-1 ring-white/10">
       
-      <div id="modal-header-stripe" class="h-2 w-full bg-slate-700"></div>
+      <!-- Top Stripe -->
+      <div id="modal-header-stripe" class="h-1.5 w-full bg-slate-700 shadow-[0_0_20px_rgba(255,255,255,0.3)]"></div>
       
       <div class="p-8">
-        <div class="flex justify-between items-start mb-6">
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-8">
           <div>
-            <div id="modal-rarity-badge" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 mb-2 border border-slate-700">RARITY</div>
-            <h2 id="modal-title" class="text-3xl font-extrabold text-white leading-tight tracking-tight">Ore Name</h2>
+            <div id="modal-rarity-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-800 text-slate-300 mb-3 border border-slate-700 shadow-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                <span>RARITY</span>
+            </div>
+            <h2 id="modal-title" class="text-3xl md:text-4xl font-extrabold text-white leading-tight tracking-tight">Ore Name</h2>
           </div>
-          <button onclick="app.closeModal()" class="text-slate-500 hover:text-white transition-colors bg-slate-800 p-2 rounded-full">
+          <button onclick="app.closeModal()" class="clickable text-slate-500 hover:text-white transition-colors bg-slate-800/50 hover:bg-slate-800 p-2.5 rounded-xl">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- content -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-4">
-            <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800">
-              <span class="text-xs text-slate-500 uppercase font-bold tracking-wider">Location Layer</span>
-              <p id="modal-layer" class="text-lg text-indigo-400 font-medium mt-1">Layer Name</p>
+            <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800/60 hover:border-indigo-500/30 transition-colors group">
+              <span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2 mb-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                Location Layer
+              </span>
+              <p id="modal-layer" class="text-xl text-slate-200 group-hover:text-white font-semibold">Layer Name</p>
             </div>
-            <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800">
-              <span class="text-xs text-slate-500 uppercase font-bold tracking-wider">Depth Range</span>
-              <p id="modal-depth" class="text-lg text-emerald-400 font-mono mt-1">0 - 100</p>
+            <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800/60 hover:border-emerald-500/30 transition-colors group">
+              <span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2 mb-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                Depth Range
+              </span>
+              <p id="modal-depth" class="text-xl text-emerald-400 font-mono mt-1">0 - 100</p>
             </div>
           </div>
           
-          <div class="space-y-3">
-             <button onclick="app.copyToClipboard()" class="w-full py-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold transition-all flex items-center justify-center gap-2 group">
-              <svg class="w-5 h-5 text-slate-500 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+          <!-- Actions -->
+          <div class="space-y-3 pt-2">
+             <button onclick="app.copyToClipboard()" class="clickable w-full py-4 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 text-slate-200 font-semibold transition-all flex items-center justify-center gap-3 group">
+              <svg class="w-5 h-5 text-slate-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
               Copy Details
             </button>
-            <button onclick="app.toggleFavoriteFromModal()" id="modal-fav-btn" class="w-full py-3 rounded-lg bg-slate-800 hover:bg-amber-900/30 border border-slate-700 hover:border-amber-600/50 text-slate-200 font-semibold transition-all flex items-center justify-center gap-2 group">
-              <svg id="modal-star-icon" class="w-5 h-5 text-slate-500 group-hover:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+            <button onclick="app.toggleFavoriteFromModal()" id="modal-fav-btn" class="clickable w-full py-4 rounded-xl bg-slate-800/50 hover:bg-amber-900/20 border border-slate-700/50 hover:border-amber-500/30 text-slate-200 font-semibold transition-all flex items-center justify-center gap-3 group">
+              <svg id="modal-star-icon" class="w-5 h-5 text-slate-500 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
               <span id="modal-fav-text">Add to Favorites</span>
             </button>
           </div>
         </div>
       </div>
       
-      <div class="bg-slate-950 px-8 py-4 border-t border-slate-800 flex justify-between items-center">
-         <span class="text-xs text-slate-600 mono">ID: <span id="modal-hash">Loading...</span></span>
-         <span class="text-xs text-slate-600">MINERS WORLD DATABASE</span>
+      <div class="bg-slate-950/80 px-8 py-4 border-t border-slate-800 flex justify-between items-center">
+         <span class="text-[10px] text-slate-600 font-mono tracking-wider">ID: <span id="modal-hash" class="text-slate-500">...</span></span>
+         <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase">Miners World</span>
       </div>
     </div>
   </div>
 
-  
-
-<div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-[70] bg-white text-slate-900 px-6 py-4 rounded-xl shadow-2xl font-semibold flex items-center gap-3">
-    <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-8 right-8 transform translate-y-20 opacity-0 transition-all duration-300 z-[70] bg-white text-slate-900 px-6 py-4 rounded-xl shadow-2xl font-bold flex items-center gap-4 ring-4 ring-slate-900/20">
+    <!-- Same toast -->
+    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+    </div>
     <span id="toast-msg">Notification</span>
   </div>
+  
+  <div id="craft-modal-backdrop" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0" onclick="if(event.target === this) app.closeCraftModal()">
+      <!-- Reuse exact same craft modal structure -->
+      <div id="craft-modal-panel" class="bg-[#0f111a] border border-slate-700/50 w-full max-w-2xl rounded-2xl shadow-2xl transform scale-95 transition-all duration-300 overflow-hidden relative max-h-[90vh] ring-1 ring-white/10">
+      <div id="craft-modal-header-stripe" class="h-1.5 w-full bg-slate-700 shadow-[0_0_20px_rgba(255,255,255,0.2)]"></div>
 
-  <script src="data.js?v=2"></script>
-  <script src="crafts.js?v=2"></script>
+      <div class="p-8 overflow-y-auto max-h-[calc(90vh-8px)] custom-scrollbar">
+        <div class="flex justify-between items-start mb-6">
+          <div>
+            <div id="craft-modal-rarity-badge" class="inline-block px-3 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 mb-2 border border-slate-700 tracking-widest uppercase">RARITY</div>
+            <h2 id="craft-modal-title" class="text-3xl font-extrabold text-white leading-tight tracking-tight">Craft Name</h2>
+          </div>
+          <button onclick="app.closeCraftModal()" class="clickable text-slate-500 hover:text-white transition-colors bg-slate-800/50 hover:bg-slate-800 p-2.5 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <div class="mb-8 p-4 bg-slate-900/50 rounded-xl border border-slate-800/50">
+          <p id="craft-modal-description" class="text-slate-300 text-base leading-relaxed">Description</p>
+        </div>
+
+        <div id="craft-modal-requirements" class="space-y-3">
+          <!-- Requirements rendered here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="data.js?v=3"></script>
+  <script src="crafts.js?v=3"></script>
 
   <script>
     // --- 1. CONFIG & DATA ---
@@ -753,17 +441,12 @@
       'Mythic': { color: '#ef4444', rank: 6 },
       'Ethereal': { color: '#ec4899', rank: 7 },
       'Celestial': { color: '#06b6d4', rank: 8 },
-      'Zenith': { color: '#800080', rank: 9 }, 
-      'Divine': { color: '#fde047', rank: 10 },
-      'Nil': { color: '#ffffff', rank: 11 },
-      'Miscellaneous Blocks': { color: '#654321', rank: 0.5 },
+      'Zenith': { color: '#d946ef', rank: 9 }, 
+      'Divine': { color: '#111111', rank: 11 }, // Updated to Black/Dark
+      'Nil': { color: '#ffffff', rank: 12 },
+      'Miscellaneous Blocks': { color: '#a16207', rank: 0.5 },
     };
 
-    // The Raw Data (Compressed for cleanliness, full dataset included)
-    // RAW_ORES is loaded from data.js
-    // const RAW_ORES is not declared here to avoid redeclaration errors
-
-    // --- 2. CORE LOGIC CLASS ---
     class App {
       constructor() {
         this.data = [];
@@ -771,22 +454,21 @@
         this.activeRarities = new Set();
         this.searchQuery = "";
         this.sortBy = "rarity_desc";
-        this.viewMode = "grid"; // 'grid' or 'list'
+        this.viewMode = "grid"; 
         this.favorites = new Set(JSON.parse(localStorage.getItem('mw_favorites') || '[]'));
         this.favoritesMode = false;
         
+        // Crafts specific
+        this.currentView = 'ores';
+        this.craftsActiveRarities = new Set();
+        this.craftsSortBy = 'rarity_desc';
+
         this.init();
       }
 
       async init() {
-        this.observer = null;
         this.visibleCount = 50;
 
-        const savedTheme = localStorage.getItem('mw_theme') || 'dark-blue';
-        this.setTheme(savedTheme);
-
-        // Load data from global variable (loaded via script tag)
-        // This avoids CORS issues with local file fetch
         if (typeof RAW_ORES !== 'undefined') {
             this.data = RAW_ORES.map((o, idx) => ({
                 ...o,
@@ -798,47 +480,36 @@
             this.buildSidebar();
             this.initIntersectionObserver();
             this.render();
+            // Initial UI state setup for View Toggle
+            this.setView('grid');
         } else {
-            console.error("RAW_ORES not found. Ensure data.js is loaded.");
+            console.error("RAW_ORES not found.");
             this.showToast("Error loading data");
-            this.data = [];
         }
       }
 
       initIntersectionObserver() {
-          // Infinite Scroll Observer (Bottom Sentinel)
           this.infiniteObserver = new IntersectionObserver((entries) => {
               if (entries[0].isIntersecting) {
                   this.visibleCount += 50;
-                  // Just append the next batch
                   this.render(true);
               }
           }, { rootMargin: '600px' });
 
-          // Virtualization Observer (Page Visibility)
           this.virtualObserver = new IntersectionObserver((entries) => {
               entries.forEach(entry => {
                   const target = entry.target;
-                  const pageId = target.dataset.pageId;
-                  
                   if (!entry.isIntersecting) {
-                      // Unload
-                      // Only unload if we have a height (prevent collapse on initial render)
                       if (target.offsetHeight > 0) {
                           target.style.height = target.offsetHeight + 'px';
                           target.innerHTML = '';
                           target.dataset.loaded = 'false';
                       }
                   } else {
-                      // Load
                       if (target.dataset.loaded === 'false') {
-                          // Retrieve data for this page
                          const start = parseInt(target.dataset.start);
                          const end = parseInt(target.dataset.end);
                          
-                         // We need the filtered list effectively. 
-                         // To avoid re-calculating getProcessedData() every time, we should cache it or accept the cost.
-                         // Given < 10k items, caching the filtered list in `this.currentFilteredData` is best.
                          if (this.currentFilteredData) {
                              const slice = this.currentFilteredData.slice(start, end);
                              const html = slice.map(item => this.viewMode === 'grid' ? this.cardTemplate(item) : this.rowTemplate(item)).join('');
@@ -849,37 +520,66 @@
                       }
                   }
               });
-          }, { rootMargin: '800px 0px 800px 0px' }); // Large margin to pre-load
+          }, { rootMargin: '800px 0px 800px 0px' }); 
       }
 
-      // Helper: Parse the complex depth strings into sortable numbers
       parseDepth(depthStr) {
         if (!depthStr) return 0;
-        // Normalize
         let s = depthStr.replace(/,/g, '').toLowerCase();
-        
-        // Handle "and below"
         if (s.includes('and below')) return -10000;
-        
-        // Match numbers. The logic here:
-        // "100--99" -> 100, -99. 
-        // "-2,000--2,399" -> -2000, -2399
-        // We take the average for sorting.
         const matches = s.match(/-?\d+/g);
         if (!matches) return 0;
-        
         const nums = matches.map(Number);
-        if (nums.length === 1) return nums[0];
-        return (nums[0] + nums[1]) / 2;
+        return nums.length === 1 ? nums[0] : (nums[0] + nums[1]) / 2;
       }
 
-      // --- VIEW ACTIONS ---
       setView(mode) {
         this.viewMode = mode;
-        // Update UI buttons
-        document.getElementById('view-grid').className = `p-1.5 rounded transition-colors ${mode==='grid' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400'}`;
-        document.getElementById('view-list').className = `p-1.5 rounded transition-colors ${mode==='list' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400'}`;
+        const btnGrid = document.getElementById('view-grid');
+        const btnList = document.getElementById('view-list');
+        
+        if(mode === 'grid') {
+            btnGrid.classList.add('bg-slate-800', 'text-white', 'shadow-sm', 'ring-1', 'ring-white/5');
+            btnGrid.classList.remove('text-slate-500', 'hover:bg-slate-800/50');
+            
+            btnList.classList.remove('bg-slate-800', 'text-white', 'shadow-sm', 'ring-1', 'ring-white/5');
+            btnList.classList.add('text-slate-500', 'hover:bg-slate-800/50');
+        } else {
+            btnList.classList.add('bg-slate-800', 'text-white', 'shadow-sm', 'ring-1', 'ring-white/5');
+            btnList.classList.remove('text-slate-500', 'hover:bg-slate-800/50');
+            
+            btnGrid.classList.remove('bg-slate-800', 'text-white', 'shadow-sm', 'ring-1', 'ring-white/5');
+            btnGrid.classList.add('text-slate-500', 'hover:bg-slate-800/50');
+        }
+        
         this.render();
+      }
+
+      switchView(viewName) {
+          const tabOres = document.getElementById('tab-ores');
+          const tabCrafts = document.getElementById('tab-crafts');
+          const searchInput = document.getElementById('search-input');
+
+          this.currentView = viewName;
+          
+          if(viewName === 'ores') {
+             tabOres.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
+             tabOres.classList.remove('text-slate-400', 'hover:bg-slate-800/50');
+             
+             tabCrafts.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
+             tabCrafts.classList.add('text-slate-400', 'hover:bg-slate-800/50');
+             
+             searchInput.placeholder = 'Search ores, depths...';
+          } else {
+             tabCrafts.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
+             tabCrafts.classList.remove('text-slate-400', 'hover:bg-slate-800/50');
+             
+             tabOres.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
+             tabOres.classList.add('text-slate-400', 'hover:bg-slate-800/50');
+             
+             searchInput.placeholder = 'Search crafts...';
+          }
+          this.render();
       }
 
       toggleMobileMenu() {
@@ -899,55 +599,47 @@
       toggleFavoritesMode() {
         this.favoritesMode = !this.favoritesMode;
         const btn = document.getElementById('btn-favs');
+        const icon = btn.querySelector('div:first-child');
+        
         if(this.favoritesMode) {
-          btn.classList.add('bg-amber-500/10', 'border-amber-500/50');
-          btn.querySelector('span').classList.add('text-amber-400');
+          btn.classList.add('bg-amber-500/10', 'border-amber-500/30');
+          icon.classList.add('bg-amber-500', 'text-black');
+          icon.classList.remove('bg-amber-500/10', 'text-amber-500');
         } else {
-          btn.classList.remove('bg-amber-500/10', 'border-amber-500/50');
-          btn.querySelector('span').classList.remove('text-amber-400');
+          btn.classList.remove('bg-amber-500/10', 'border-amber-500/30');
+          icon.classList.remove('bg-amber-500', 'text-black');
+          icon.classList.add('bg-amber-500/10', 'text-amber-500');
         }
         this.render();
       }
 
       // --- FILTER LOGIC ---
       buildSidebar() {
-        // Layers
         const layers = [...new Set(this.data.map(d => d.layer))].filter(Boolean);
         const layerContainer = document.getElementById('layer-list');
         
         const mkLayerBtn = (name) => {
           const btn = document.createElement('button');
-          btn.className = 'w-full text-left px-3 py-1.5 rounded text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-colors truncate';
+          btn.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors truncate';
           btn.innerText = name || "All Layers";
           
           btn.onclick = () => {
-             // Reset highlight - remove all active states
              Array.from(layerContainer.children).forEach(c => {
-               c.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
-               c.classList.add('text-slate-400', 'hover:bg-slate-800');
+               c.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors truncate';
              });
-             if(name) {
-               this.activeLayer = name;
-               btn.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
-               btn.classList.remove('text-slate-400', 'hover:bg-slate-800');
-             } else {
-               this.activeLayer = null;
-               // "All Layers" gets the same indigo styling as other selected layers
-               layerContainer.firstElementChild.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
-               layerContainer.firstElementChild.classList.remove('text-slate-400', 'hover:bg-slate-800');
-             }
+             this.activeLayer = name;
+             btn.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 truncate';
              this.render();
           };
           return btn;
         };
 
-        layerContainer.appendChild(mkLayerBtn(null)); // "All" button
+        layerContainer.appendChild(mkLayerBtn(null)); 
         layers.forEach(l => layerContainer.appendChild(mkLayerBtn(l)));
 
-        // Set initial active state on "All Layers"
+        // Activate "All" by default
         if(layerContainer.firstElementChild) {
-          layerContainer.firstElementChild.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
-          layerContainer.firstElementChild.classList.remove('text-slate-400', 'hover:bg-slate-800');
+           layerContainer.firstElementChild.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 truncate';
         }
 
         // Rarities
@@ -955,33 +647,32 @@
         const rarContainer = document.getElementById('rarity-list');
         rarities.forEach(r => {
           const btn = document.createElement('button');
-          btn.className = 'px-2 py-1 rounded border border-slate-700 bg-slate-900/50 text-[10px] uppercase font-bold text-slate-400 hover:border-slate-500 transition-all';
+          btn.className = 'px-2.5 py-1 rounded-md border border-slate-800 bg-slate-900/30 text-[10px] uppercase font-bold text-slate-500 hover:border-slate-600 hover:text-slate-300 transition-all';
           btn.innerText = r;
-          btn.style.color = RarityConfig[r].color; // hint text color
           
           btn.onclick = () => {
-            // Use the appropriate activeRarities set based on current view
-            const activeSet = (app.currentView === 'crafts') ? app.craftsActiveRarities : this.activeRarities;
-            if(activeSet.has(r)) {
-              activeSet.delete(r);
-              btn.classList.remove('bg-slate-800', 'border-white');
-              btn.style.backgroundColor = '';
-            } else {
-              activeSet.add(r);
-              btn.classList.add('border-white');
-              btn.style.backgroundColor = RarityConfig[r].color + '22'; // 20% opacity bg
-            }
-            // Check which view is active and render accordingly
-            if (app.currentView === 'crafts') {
-              app.renderCrafts();
-            } else {
-              this.render();
-            }
+             // Handle set selection
+             const activeSet = this.currentView === 'crafts' ? this.craftsActiveRarities : this.activeRarities;
+             if(activeSet.has(r)) {
+                 activeSet.delete(r);
+                 btn.className = 'px-2.5 py-1 rounded-md border border-slate-800 bg-slate-900/30 text-[10px] uppercase font-bold text-slate-500 hover:border-slate-600 hover:text-slate-300 transition-all';
+                 btn.style.color = '';
+                 btn.style.borderColor = '';
+                 btn.style.backgroundColor = '';
+             } else {
+                 activeSet.add(r);
+                 const c = RarityConfig[r].color;
+                 btn.className = 'px-2.5 py-1 rounded-md border text-[10px] uppercase font-bold transition-all shadow-lg';
+                 btn.classList.add('ring-1', 'ring-white/10');
+                 btn.style.color = c;
+                 btn.style.borderColor = c;
+                 btn.style.backgroundColor = c + '15'; // 10% opacity
+             }
+             this.render();
           };
           rarContainer.appendChild(btn);
         });
 
-        // Stats Chart
         this.updateStats();
       }
 
@@ -996,104 +687,97 @@
           if(!counts[r]) return;
           const pct = (counts[r] / max) * 100;
           const row = document.createElement('div');
-          row.className = "flex items-center gap-2 text-[10px]";
+          row.className = "flex items-center gap-3 text-[10px] group cursor-default";
           row.innerHTML = `
-            <div class="w-16 text-right text-slate-500 truncate">${r}</div>
-            <div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-              <div class="h-full rounded-full" style="width: ${pct}%; background-color: ${RarityConfig[r].color}"></div>
+            <div class="w-16 text-right text-slate-500 truncate group-hover:text-slate-300 transition-colors">${r}</div>
+            <div class="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background-color: ${RarityConfig[r].color}"></div>
             </div>
-            <div class="w-6 text-slate-400">${counts[r]}</div>
+            <div class="w-6 text-slate-500 font-mono">${counts[r]}</div>
           `;
           container.appendChild(row);
         });
-        document.getElementById('total-count').innerText = this.data.length;
+        document.getElementById('total-count').innerText = this.data.length + ' Items';
         
-        // Update Fav Badge
         const badge = document.getElementById('fav-count-badge');
         badge.innerText = this.favorites.size;
         badge.classList.toggle('opacity-0', this.favorites.size === 0);
       }
 
       handleSort() {
-        this.sortBy = document.getElementById('sort-select').value;
+        const val = document.getElementById('sort-select').value;
+        if(this.currentView === 'crafts') this.craftsSortBy = val;
+        else this.sortBy = val;
         this.render();
       }
 
       resetFilters() {
         this.activeLayer = null;
         this.activeRarities.clear();
+        this.craftsActiveRarities.clear();
         this.searchQuery = "";
         this.favoritesMode = false;
-        // Also reset crafts filters
-        if (app.craftsActiveRarities) app.craftsActiveRarities.clear();
         document.getElementById('search-input').value = "";
-        // Reset DOM visual states
-        document.getElementById('btn-favs').classList.remove('bg-amber-500/10');
+          
+        this.toggleFavoritesMode(); // Only if it was on? no, this toggles.
+        if(this.favoritesMode) this.toggleFavoritesMode(); // Turn off if on
+
+        // Reset visual buttons
         const layerButtons = document.getElementById('layer-list').children;
         Array.from(layerButtons).forEach(c => {
-          c.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
-          c.classList.add('text-slate-400', 'hover:bg-slate-800');
+             c.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors truncate';
         });
-        // Set "All Layers" as active with indigo styling
-        if(layerButtons.length > 0) {
-          layerButtons[0].classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
-          layerButtons[0].classList.remove('text-slate-400', 'hover:bg-slate-800');
-        }
-        Array.from(document.getElementById('rarity-list').children).forEach(c => { c.classList.remove('border-white'); c.style.backgroundColor=''; });
+        if(layerButtons.length > 0) layerButtons[0].className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 truncate';
+
+        const rarButtons = document.getElementById('rarity-list').children;
+        Array.from(rarButtons).forEach(b => {
+             b.className = 'px-2.5 py-1 rounded-md border border-slate-800 bg-slate-900/30 text-[10px] uppercase font-bold text-slate-500 hover:border-slate-600 hover:text-slate-300 transition-all';
+             b.style = "";
+        });
+
         this.render();
       }
 
-      // --- DATA PROCESSING ---
       getProcessedData() {
         let res = this.data;
-
-        // 1. Search
+        // Search
         const q = this.searchQuery.toLowerCase();
         if(q) {
           res = res.filter(o => 
             o.name.toLowerCase().includes(q) || 
             o.layer.toLowerCase().includes(q) || 
-            o.rarity.toLowerCase().includes(q)
+            (o.rarity && o.rarity.toLowerCase().includes(q))
           );
         }
+        // Filters
+        if(this.activeLayer) res = res.filter(o => o.layer === this.activeLayer);
+        if(this.activeRarities.size > 0) res = res.filter(o => this.activeRarities.has(o.rarity));
+        if(this.favoritesMode) res = res.filter(o => this.favorites.has(o.id));
 
-        // 2. Filter Layer
-        if(this.activeLayer) {
-          res = res.filter(o => o.layer === this.activeLayer);
-        }
-
-        // 3. Filter Rarity
-        if(this.activeRarities.size > 0) {
-          res = res.filter(o => this.activeRarities.has(o.rarity));
-        }
-
-        // 4. Favorites
-        if(this.favoritesMode) {
-          res = res.filter(o => this.favorites.has(o.id));
-        }
-
-        // 5. Sort
+        // Sort
         res.sort((a, b) => {
           switch(this.sortBy) {
             case 'name_asc': return a.name.localeCompare(b.name);
             case 'rarity_asc': return a.rarityRank - b.rarityRank;
             case 'rarity_desc': return b.rarityRank - a.rarityRank;
-            case 'depth_deep': return a.parsedDepth - b.parsedDepth; // Lower number = deeper
+            case 'depth_deep': return a.parsedDepth - b.parsedDepth;
             case 'depth_shallow': return b.parsedDepth - a.parsedDepth;
             default: return 0;
           }
         });
-
         return res;
       }
 
-      // --- RENDERING ---
       render(isAppend = false) {
+          if (this.currentView === 'crafts') {
+              this.renderCrafts();
+              return;
+          }
+
         if (!isAppend) {
             this.visibleCount = 50;
-            this.currentFilteredData = this.getProcessedData(); // Cache the result
+            this.currentFilteredData = this.getProcessedData(); 
         } else {
-             // Make sure we have cached data
              if (!this.currentFilteredData) this.currentFilteredData = this.getProcessedData();
         }
 
@@ -1108,20 +792,17 @@
         }
         empty.classList.add('hidden');
         
-        // Setup Grid Classes
         grid.className = this.viewMode === 'grid' 
-          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pb-10"
-          : "flex flex-col gap-2 pb-10";
+          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20"
+          : "flex flex-col gap-3 pb-20";
 
         if (!isAppend) {
              grid.innerHTML = '';
-             // Render first page immediately
              this.appendPageBlock(grid, filtered, 0, 50, 0);
         } else {
              const s = document.getElementById('scroll-sentinel');
              if (s) s.remove();
              
-             // Calculate start index based on current count
              const start = this.visibleCount - 50; 
              const end = Math.min(this.visibleCount, filtered.length);
              const pageIndex = Math.floor(start / 50);
@@ -1142,118 +823,184 @@
 
       appendPageBlock(grid, data, start, end, pageIndex) {
           const pageDiv = document.createElement('div');
-          pageDiv.className = 'contents page-block'; // 'contents' makes children act as direct grid items
-          // However, for virtualization wrapper to have height, 'contents' is BAD because it has no box.
-          // We need a wrapper that respects the grid flow? 
-          // CSS Grid doesn't support "partial" wrappers easily unless subgrid (new).
-          // ALternative: The 'pageDiv' is just a grouping concept?
-          
-          // SOLUTION: For virtualization in a Grid, it is much harder.
-          // If we use a wrapper div inside a grid, that wrapper becomes a SINGULAR grid item.
-          // So we simply CANNOT use a wrapper div if the parent is `display: grid`.
-          // Unless the wrapper div is ITSELF `display: grid` with subgrid or same cols.
-          
-          // Let's try: `col-span-full grid ...`
-          // If we make the pageDiv full width, containing its own internal grid.
           pageDiv.className = this.viewMode === 'grid' 
-            ? "col-span-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5"
-            : "flex flex-col gap-2 w-full";
+            ? "contents" // In Grid mode, use contents so children participate in parent grid directly
+            : "flex flex-col gap-3 w-full"; // In List mode, regular wrapper
           
-          pageDiv.dataset.pageId = pageIndex;
-          pageDiv.dataset.start = start;
-          pageDiv.dataset.end = end;
-          pageDiv.dataset.loaded = 'true';
-          
-          const slice = data.slice(start, end);
-          pageDiv.innerHTML = slice.map(item => this.viewMode === 'grid' ? this.cardTemplate(item) : this.rowTemplate(item)).join('');
-          
+          if(this.viewMode === 'grid') {
+             // Virtualization hack for 'contents': 
+             // We can't really virtualize 'contents' easily because it has no dimensions.
+             // We will skip virtualization for Grid mode for now to keep layout perfect, 
+             // or render direct children.
+             // Reverting to direct append for grid mode to ensure layout stability 
+             const slice = data.slice(start, end);
+             const html = slice.map(item => this.cardTemplate(item)).join('');
+             // We just append to grid innerHTML? No, we need to respect the append.
+             // If we use 'contents', we can't easily unload it as a block without wrapping it.
+             // But wrapping it breaks the grid unless subgrid.
+             
+             // COMPROMISE: Render simple HTML strings for now.
+             pageDiv.innerHTML = html;
+          } else {
+              // List mode virtualization works fine
+             pageDiv.dataset.pageId = pageIndex;
+             pageDiv.dataset.start = start;
+             pageDiv.dataset.end = end;
+             pageDiv.dataset.loaded = 'true';
+             const slice = data.slice(start, end);
+             pageDiv.innerHTML = slice.map(item => this.rowTemplate(item)).join('');
+             if(this.virtualObserver) this.virtualObserver.observe(pageDiv);
+          }
+           
           grid.appendChild(pageDiv);
-          
-          if(this.virtualObserver) this.virtualObserver.observe(pageDiv);
       }
 
       cardTemplate(o) {
-        const color = RarityConfig[o.rarity].color;
+        const color = RarityConfig[o.rarity]?.color || '#fff';
         const isFav = this.favorites.has(o.id);
+        const divineClass = o.rarity === 'Divine' ? 'text-divine' : '';
+        
         return `
           <div onclick="app.openModal(${o.id})" 
-               class="group relative bg-slate-900 border border-slate-800 rounded-xl p-4 cursor-pointer hover:bg-slate-800/80 transition-all duration-300 hover:-translate-y-1 overflow-hidden card-hover-effect"
+               class="group relative bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 cursor-pointer card-glow overflow-hidden animate-slide-up"
                style="--glow-color: ${color}">
             
-            <div class="absolute top-0 left-0 w-full h-1" style="background-color: ${color}"></div>
+            <div class="flex justify-between items-start mb-3 relative z-10">
+              <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-slate-700/50 bg-slate-950/30 ${divineClass}" style="color:${color}; border-color:${color}40">${o.rarity}</span>
+              ${isFav ? `<div class="bg-amber-500/10 p-1 rounded-full"><svg class="w-3.5 h-3.5 text-amber-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></div>` : ''}
+            </div>
+
+            <h3 class="font-bold text-slate-200 text-lg leading-tight mb-4 group-hover:text-white transition-colors line-clamp-2 min-h-[3rem] ${divineClass}">${o.name}</h3>
+
+            <div class="space-y-2 relative z-10 border-t border-slate-800/50 pt-3">
+              <div class="flex justify-between text-xs items-center">
+                <span class="text-slate-500 font-medium">Layer</span>
+                <span class="text-slate-400 truncate max-w-[60%] text-right bg-slate-800/50 px-2 py-0.5 rounded">${o.layer}</span>
+              </div>
+              <div class="flex justify-between text-xs items-center">
+                <span class="text-slate-500 font-medium">Depth</span>
+                <span class="text-emerald-400 font-mono tracking-tight">${o.depth}</span>
+              </div>
+            </div>
             
-            <div class="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 bg-gradient-to-b from-[${color}] to-transparent pointer-events-none"></div>
-
-            <div class="flex justify-between items-start mb-2 relative z-10">
-              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-slate-700 bg-slate-950/50" style="color:${color}">${o.rarity}</span>
-              ${isFav ? `<svg class="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>` : ''}
-            </div>
-
-            <h3 class="font-bold text-slate-100 text-lg leading-tight mb-3 truncate group-hover:text-white">${o.name}</h3>
-
-            <div class="space-y-1 relative z-10">
-              <div class="flex justify-between text-xs">
-                <span class="text-slate-500">Layer</span>
-                <span class="text-slate-400 font-mono truncate max-w-[60%] text-right">${o.layer}</span>
-              </div>
-              <div class="flex justify-between text-xs">
-                <span class="text-slate-500">Depth</span>
-                <span class="text-emerald-500 font-mono">${o.depth}</span>
-              </div>
-            </div>
+             <!-- Bottom color bar glow -->
+             <div class="absolute bottom-0 left-0 right-0 h-1 opacity-50 group-hover:opacity-100 transition-opacity" style="background: ${color}; box-shadow: 0 -5px 15px ${color}40"></div>
           </div>
         `;
       }
 
       rowTemplate(o) {
-        const color = RarityConfig[o.rarity].color;
+        const color = RarityConfig[o.rarity]?.color || '#fff';
         const isFav = this.favorites.has(o.id);
-        const safeName = o.name.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-        const safeLayer = o.layer.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+        const safeName = o.name.replace(/'/g, "&#39;");
+        const divineClass = o.rarity === 'Divine' ? 'text-divine' : '';
+        
         return `
-          <div onclick="app.openModal(${o.id})" class="flex items-center gap-4 p-3 bg-slate-900/50 border border-slate-800 rounded-lg hover:bg-slate-800 cursor-pointer group transition-colors">
-            <div class="w-1 h-8 rounded-full" style="background-color: ${color}"></div>
+          <div onclick="app.openModal(${o.id})" class="flex items-center gap-5 p-4 bg-slate-900/40 border border-slate-800/50 rounded-xl hover:bg-slate-800/60 cursor-pointer group transition-all animate-slide-up hover:border-slate-700">
+            <div class="w-1.5 h-10 rounded-full shadow-[0_0_10px_currentColor]" style="background-color: ${color}; color: ${color}"></div>
             <div class="flex-1 min-w-0">
-              <h4 class="font-bold text-slate-200 truncate group-hover:text-white">${safeName}</h4>
-              <div class="text-xs text-slate-500 truncate">${safeLayer}</div>
+              <h4 class="font-bold text-slate-200 group-hover:text-white text-base ${divineClass}">${safeName}</h4>
+              <div class="text-xs text-slate-500 truncate mt-0.5">${o.layer}</div>
             </div>
-            <div class="hidden md:block text-xs font-mono text-emerald-500">${o.depth}</div>
-            <div class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-950 border border-slate-700 whitespace-nowrap" style="color:${color}">${o.rarity}</div>
-            ${isFav ? `<svg class="w-4 h-4 text-amber-400 fill-current shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>` : ''}
+            <div class="hidden md:block text-xs font-mono text-emerald-500 px-3 py-1 bg-emerald-500/10 rounded border border-emerald-500/20">${o.depth}</div>
+            <div class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-slate-950 border border-slate-800 whitespace-nowrap min-w-[80px] text-center ${divineClass}" style="color:${color}">${o.rarity}</div>
+            ${isFav ? `<svg class="w-4 h-4 text-amber-500 fill-current shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>` : '<div class="w-4"></div>'}
           </div>
         `;
       }
 
-      // --- MODAL & INTERACTION ---
+      // --- RENDER CRAFTS ---
+      renderCrafts() {
+          const grid = document.getElementById('results-grid');
+          if (!grid || typeof CRAFTS === 'undefined') return;
+
+          grid.className = this.viewMode === 'grid' 
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20"
+            : "flex flex-col gap-3 pb-20";
+        
+          const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+          
+          // Basic filtering
+          let filtered = (typeof CRAFTS !== 'undefined') ? CRAFTS : [];
+          if(searchTerm) filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm));
+          if(this.craftsActiveRarities.size > 0) filtered = filtered.filter(c => this.craftsActiveRarities.has(c.rarity));
+
+          // Sort
+          filtered.sort((a,b) => {
+             const rA = RarityConfig[a.rarity]?.rank || 0;
+             const rB = RarityConfig[b.rarity]?.rank || 0;
+             return this.craftsSortBy === 'rarity_desc' ? rB - rA : rA - rB;
+          });
+
+          if(filtered.length === 0) {
+              grid.innerHTML = document.getElementById('empty-state').outerHTML.replace('hidden', '');
+              return;
+          }
+
+          grid.innerHTML = filtered.map(craft => {
+               const config = RarityConfig[craft.rarity] || { color: '#64748b' };
+               const craftJson = JSON.stringify(craft).replace(/"/g, '&quot;');
+               
+               return `
+               <div onclick="app.openCraftModal(${craftJson})" class="group relative bg-[#11131f] border border-slate-800/60 rounded-2xl overflow-hidden cursor-pointer hover:border-slate-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl animate-fade-in" style="--glow-color: ${config.color}">
+                 <div class="h-1 w-full" style="background: ${config.color}; box-shadow: 0 2px 10px ${config.color}50"></div>
+                 <div class="p-6">
+                    <div class="flex items-start justify-between mb-4"> 
+                        <h3 class="text-lg font-bold text-white leading-tight group-hover:text-indigo-300 transition-colors">${craft.name}</h3>
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-slate-900 border border-slate-800" style="color: ${config.color}">${craft.rarity}</span>
+                    </div>
+                    ${craft.requirements ? `
+                    <div class="bg-slate-950/50 rounded-xl p-3 border border-slate-800/50 space-y-2">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">Needs</span>
+                        ${craft.requirements.slice(0, 3).map(r => `
+                             <div class="flex justify-between text-xs text-slate-400">
+                                <span>${r.block}</span>
+                                <span class="font-mono text-slate-300">${r.amount}</span>
+                             </div>
+                        `).join('')}
+                        ${craft.requirements.length > 3 ? `<div class="text-[10px] text-center text-slate-600 italic">+${craft.requirements.length - 3} more</div>` : ''}
+                    </div>` : ''}
+                 </div>
+               </div>
+               `;
+          }).join('');
+          
+          document.getElementById('total-count').innerText = filtered.length + ' Crafts';
+      }
+
       openModal(id) {
         const item = this.data.find(i => i.id === id);
         if(!item) return;
         this.currentModalItem = item;
-
-        const color = RarityConfig[item.rarity].color;
+        const color = RarityConfig[item.rarity]?.color;
         
         document.getElementById('modal-title').innerText = item.name;
         document.getElementById('modal-layer').innerText = item.layer;
         document.getElementById('modal-depth').innerText = item.depth;
-        document.getElementById('modal-hash').innerText = btoa(item.name + item.id).substring(0, 16); // Fake hash ID
+        document.getElementById('modal-hash').innerText = btoa(item.name + item.id).substring(0, 16);
         
-        // Rarity Styling
         const badge = document.getElementById('modal-rarity-badge');
-        badge.innerText = item.rarity;
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-current"></span> ${item.rarity}`;
         badge.style.color = color;
         badge.style.borderColor = color;
-        badge.style.backgroundColor = color + '15'; // Low opacity bg
+        badge.style.backgroundColor = color + '15';
         
         document.getElementById('modal-header-stripe').style.backgroundColor = color;
+        document.getElementById('modal-header-stripe').style.boxShadow = `0 0 25px ${color}`;
 
-        // Fav Button State
+        // Ensure title contrast if Divine
+        if(item.rarity === 'Divine') {
+            document.getElementById('modal-title').classList.add('text-divine');
+        } else {
+             document.getElementById('modal-title').classList.remove('text-divine');
+        }
+
         this.updateModalFavBtn();
 
         const backdrop = document.getElementById('modal-backdrop');
         const panel = document.getElementById('modal-panel');
         
         backdrop.classList.remove('hidden');
-        // Small timeout for animation
         requestAnimationFrame(() => {
           backdrop.classList.remove('opacity-0');
           panel.classList.remove('scale-95');
@@ -1264,11 +1011,9 @@
       closeModal() {
         const backdrop = document.getElementById('modal-backdrop');
         const panel = document.getElementById('modal-panel');
-        
         backdrop.classList.add('opacity-0');
         panel.classList.remove('scale-100');
         panel.classList.add('scale-95');
-        
         setTimeout(() => {
           backdrop.classList.add('hidden');
           this.currentModalItem = null;
@@ -1281,16 +1026,15 @@
         
         if(this.favorites.has(id)) {
           this.favorites.delete(id);
-          this.showToast(`Removed ${this.currentModalItem.name} from favorites`);
+          this.showToast(`Removed from favorites`);
         } else {
           this.favorites.add(id);
-          this.showToast(`Added ${this.currentModalItem.name} to favorites`);
+          this.showToast(`Saved to favorites`);
         }
-        
         localStorage.setItem('mw_favorites', JSON.stringify([...this.favorites]));
         this.updateModalFavBtn();
         this.updateStats();
-        this.render(); // Re-render grid to show stars
+        this.render(); 
       }
 
       updateModalFavBtn() {
@@ -1300,14 +1044,59 @@
         const txt = document.getElementById('modal-fav-text');
 
         if(isFav) {
-          icon.classList.add('fill-current', 'text-amber-400');
+          icon.classList.add('text-amber-400', 'fill-current');
           txt.innerText = "Remove Favorite";
-          btn.classList.add('border-amber-500/50', 'bg-amber-500/10');
+          btn.classList.add('border-amber-500/30', 'bg-amber-500/10');
         } else {
-          icon.classList.remove('fill-current', 'text-amber-400');
+          icon.classList.remove('text-amber-400', 'fill-current');
           txt.innerText = "Add to Favorites";
-          btn.classList.remove('border-amber-500/50', 'bg-amber-500/10');
+          btn.classList.remove('border-amber-500/30', 'bg-amber-500/10');
         }
+      }
+      
+      openCraftModal(craft) {
+        document.getElementById('craft-modal-title').innerText = craft.name;
+        document.getElementById('craft-modal-description').innerText = craft.description || 'No description available.';
+        
+        const color = RarityConfig[craft.rarity]?.color || '#fff';
+        const badge = document.getElementById('craft-modal-rarity-badge');
+        badge.innerText = craft.rarity;
+        badge.style.color = color;
+        badge.style.borderColor = color;
+        badge.style.backgroundColor = color + '15';
+        document.getElementById('craft-modal-header-stripe').style.backgroundColor = color;
+        document.getElementById('craft-modal-header-stripe').style.boxShadow = `0 0 25px ${color}`;
+
+        const reqContainer = document.getElementById('craft-modal-requirements');
+        if (craft.requirements && craft.requirements.length > 0) {
+           reqContainer.innerHTML = `<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Required Materials</h3>` + 
+           craft.requirements.map(req => `
+                <div class="flex items-center justify-between bg-slate-900/50 p-4 rounded-xl border border-slate-800/50">
+                    <span class="text-slate-200 font-medium">${req.block}</span>
+                    <span class="font-mono font-bold text-indigo-400">${req.amount.toLocaleString()}</span>
+                </div>
+           `).join('');
+        } else {
+            reqContainer.innerHTML = `<div class="p-4 text-center text-slate-500 italic border border-dashed border-slate-800 rounded-xl">No requirements</div>`;
+        }
+
+        const backdrop = document.getElementById('craft-modal-backdrop');
+        const panel = document.getElementById('craft-modal-panel');
+        backdrop.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          backdrop.classList.remove('opacity-0');
+          panel.classList.remove('scale-95');
+          panel.classList.add('scale-100');
+        });
+      }
+      
+      closeCraftModal() {
+        const backdrop = document.getElementById('craft-modal-backdrop');
+        const panel = document.getElementById('craft-modal-panel');
+        backdrop.classList.add('opacity-0');
+        panel.classList.remove('scale-100');
+        panel.classList.add('scale-95');
+        setTimeout(() => backdrop.classList.add('hidden'), 300);
       }
 
       copyToClipboard() {
@@ -1315,7 +1104,7 @@
         const i = this.currentModalItem;
         const text = `Ore: ${i.name}\nRarity: ${i.rarity}\nLayer: ${i.layer}\nDepth: ${i.depth}`;
         navigator.clipboard.writeText(text).then(() => {
-          this.showToast('Copied item details to clipboard');
+          this.showToast('Details copied');
         });
       }
 
@@ -1323,48 +1112,12 @@
         const t = document.getElementById('toast');
         document.getElementById('toast-msg').innerText = msg;
         t.classList.remove('opacity-0', 'translate-y-20');
-        
         if(this.toastTimer) clearTimeout(this.toastTimer);
         this.toastTimer = setTimeout(() => {
           t.classList.add('opacity-0', 'translate-y-20');
         }, 3000);
       }
-
-      exportData() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.data, null, 2));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "miners_world_export.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-        this.showToast("Database exported successfully");
-      }
-
-      setTheme(theme) {
-        this.currentTheme = theme;
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('mw_theme', theme);
-        this.updateThemeButtons();
-        this.showToast(`Theme changed to ${theme.replace('-', ' ')}`);
-      }
-
-      updateThemeButtons() {
-        const themes = ['light', 'dark-blue', 'black'];
-        themes.forEach(t => {
-          const btn = document.getElementById(`theme-${t}`);
-          if (btn) {
-            if (t === this.currentTheme) {
-              btn.classList.add('bg-indigo-600', 'text-white');
-              btn.classList.remove('text-slate-400');
-            } else {
-              btn.classList.remove('bg-indigo-600', 'text-white');
-              btn.classList.add('text-slate-400');
-            }
-          }
-        });
-      }
-
+      
       toggleDepthSimulator() {
         const panel = document.getElementById('depth-simulator');
         const overlay = document.getElementById('depth-overlay');
@@ -1374,876 +1127,69 @@
           panel.classList.add('translate-x-full');
           overlay.classList.add('hidden');
           overlay.classList.remove('opacity-100');
-          document.body.style.overflow = '';
         } else {
-          // Close other panels first
-          this.closeAllPanels();
           panel.classList.remove('translate-x-full');
           overlay.classList.remove('hidden');
           setTimeout(() => overlay.classList.add('opacity-100'), 10);
-          document.body.style.overflow = 'hidden';
           this.renderDepthSimulator();
         }
       }
 
       renderDepthSimulator() {
         const container = document.getElementById('depth-content');
-
-        // Group ores by layer
         const layers = {};
         this.data.forEach(ore => {
           if (!layers[ore.layer]) {
-            layers[ore.layer] = {
-              depth: ore.parsedDepth,
-              depthStr: ore.depth,
-              ores: []
-            };
+            layers[ore.layer] = { depth: ore.parsedDepth, depthStr: ore.depth, ores: [] };
           }
           layers[ore.layer].ores.push(ore);
         });
-
-        // Sort layers by depth (surface to core)
         const sortedLayers = Object.entries(layers).sort((a, b) => b[1].depth - a[1].depth);
-
-        // Calculate total depth range
         const maxDepth = Math.max(...this.data.map(o => o.parsedDepth));
         const minDepth = Math.min(...this.data.map(o => o.parsedDepth));
-        const depthRange = maxDepth - minDepth;
+        const range = maxDepth - minDepth;
 
-        let html = '<div class="relative pl-12">';
-        html += '<div class="depth-ruler"></div>';
-
+        // Simplified, Cleaner list format (User didn't like the meter/complex view)
+        // We'll rename it "Geological Map" and make it just a nice list of layers.
+        
+        let html = '<div class="relative pl-0">';
+        
         sortedLayers.forEach(([layerName, layerData], index) => {
-          const depthPercent = ((layerData.depth - minDepth) / depthRange) * 100;
-          const isSurface = layerData.depth > 0;
-          const isDeep = layerData.depth < -3000;
+           // We'll create a subtle gradient per item to show depth progression
+           const depthRatio = (layerData.depth - minDepth) / range; // 0 to 1
+           const opacity = 0.05 + (depthRatio * 0.1); // slightly increasing opacity
+           
+           html += `
+             <div class="depth-layer p-5 border-b border-slate-800/50 cursor-pointer group hover:bg-slate-800/20 transition-all relative overflow-hidden" 
+                  onclick="app.activeLayer='${layerName}'; app.toggleDepthSimulator(); app.render(); app.showToast('Filtered by Layer')">
+               
+               <div class="absolute inset-0 bg-indigo-500 pointer-events-none" style="opacity: ${opacity}"></div>
+               <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500/0 group-hover:bg-indigo-500 transition-colors"></div>
 
-          // Determine layer color based on depth
-          let layerColor = 'from-slate-700 to-slate-800';
-          if (isSurface) layerColor = 'from-sky-600/20 to-cyan-600/20';
-          else if (isDeep) layerColor = 'from-purple-900/40 to-pink-900/40';
-          else if (layerData.depth < -1000) layerColor = 'from-orange-900/30 to-red-900/30';
-
-          // Group ores by rarity
-          const oresByRarity = {};
-          layerData.ores.forEach(ore => {
-            if (!oresByRarity[ore.rarity]) oresByRarity[ore.rarity] = [];
-            oresByRarity[ore.rarity].push(ore);
-          });
-
-          html += `
-            <div class="depth-layer bg-gradient-to-r ${layerColor} hover:from-opacity-30" 
-                 onclick="app.filterByLayer('${layerName}')">
-              <div class="depth-indicator"></div>
-              <div class="flex justify-between items-start mb-2">
-                <h4 class="font-bold text-white text-sm">${layerName}</h4>
-                <span class="text-xs font-mono text-cyan-400">${layerData.depthStr}</span>
-              </div>
-              <div class="flex flex-wrap gap-1">
-                ${Object.entries(oresByRarity).map(([rarity, ores]) => {
-                  const color = RarityConfig[rarity]?.color || '#64748b';
-                  const count = ores.length;
-                  return `<div class="ore-node" style="color: ${color}; border-color: ${color}">
-                    <span class="w-2 h-2 rounded-full" style="background: ${color}"></span>
-                    ${rarity} (${count})
-                  </div>`;
-                }).join('')}
-              </div>
-            </div>
-          `;
+               <div class="flex justify-between items-center mb-1 relative z-10">
+                 <h4 class="font-bold text-slate-200 group-hover:text-white transition-colors text-base">${layerName}</h4>
+                 <span class="text-[10px] font-mono text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">${layerData.depthStr}</span>
+               </div>
+               
+               <div class="flex flex-wrap gap-1.5 mt-2 relative z-10">
+                 ${layerData.ores.slice(0, 12).map(o => {
+                    const c = RarityConfig[o.rarity]?.color;
+                    return `<div class="w-2 h-2 rounded-sm opacity-60 hover:opacity-100" style="background:${c}" title="${o.name}"></div>`
+                 }).join('')}
+                 ${layerData.ores.length > 12 ? `<span class="text-[9px] text-slate-500 ml-1">+${layerData.ores.length-12}</span>` : ''}
+               </div>
+             </div>
+           `;
         });
-
+        
         html += '</div>';
-        html += `
-          <div class="mt-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-            <h5 class="text-xs font-bold text-slate-400 uppercase mb-2">Quick Stats</h5>
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              <div class="text-slate-500">Total Layers:</div>
-              <div class="text-white font-mono">${sortedLayers.length}</div>
-              <div class="text-slate-500">Total Ores:</div>
-              <div class="text-white font-mono">${this.data.length}</div>
-              <div class="text-slate-500">Depth Range:</div>
-              <div class="text-white font-mono">${maxDepth.toLocaleString()} to ${minDepth.toLocaleString()}</div>
-            </div>
-          </div>
-        `;
-
         container.innerHTML = html;
-
-        // Add scroll listener for depth progress
-        container.addEventListener('scroll', () => {
-          const scrollPercent = (container.scrollTop / (container.scrollHeight - container.clientHeight)) * 100;
-          document.getElementById('depth-progress').style.width = scrollPercent + '%';
-
-          // Update current depth display based on scroll
-          const currentDepth = Math.round(maxDepth - (scrollPercent / 100) * depthRange);
-          document.getElementById('current-depth-display').textContent = currentDepth.toLocaleString() + 'm';
-        });
-      }
-
-      filterByLayer(layerName) {
-        this.activeLayer = layerName;
-        this.toggleDepthSimulator(); // Close simulator
-
-        // Update sidebar visual state
-        const layerButtons = document.getElementById('layer-list').children;
-        Array.from(layerButtons).forEach(btn => {
-          btn.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
-          btn.classList.add('text-slate-400', 'hover:bg-slate-800');
-          if (btn.innerText === layerName) {
-            btn.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
-            btn.classList.remove('text-slate-400', 'hover:bg-slate-800');
-          }
-        });
-
-        this.render();
-        this.showToast(`Filtered by: ${layerName}`);
-      }
-
-      toggleAnalytics() {
-        const panel = document.getElementById('analytics-panel');
-        const overlay = document.getElementById('analytics-overlay');
-        const isOpen = !panel.classList.contains('translate-x-full');
-
-        if (isOpen) {
-          panel.classList.add('translate-x-full');
-          overlay.classList.add('hidden');
-          overlay.classList.remove('opacity-100');
-        } else {
-          // Close other panels first
-          this.closeAllPanels();
-          panel.classList.remove('translate-x-full');
-          overlay.classList.remove('hidden');
-          setTimeout(() => overlay.classList.add('opacity-100'), 10);
-          this.renderAnalytics();
-        }
-      }
-
-      renderAnalytics() {
-        const container = document.getElementById('analytics-content');
-
-        // Calculate ore stats
-        const totalOres = this.data.length;
-        const layers = [...new Set(this.data.map(o => o.layer))];
-
-        // Calculate craft stats
-        const totalCrafts = typeof CRAFTS !== 'undefined' ? CRAFTS.length : 0;
-
-        // Rarity distribution for ores
-        const rarityCounts = {};
-        this.data.forEach(o => {
-          rarityCounts[o.rarity] = (rarityCounts[o.rarity] || 0) + 1;
-        });
-
-        // Rarity distribution for crafts
-        const craftRarityCounts = {};
-        if (typeof CRAFTS !== 'undefined') {
-          CRAFTS.forEach(c => {
-            craftRarityCounts[c.rarity] = (craftRarityCounts[c.rarity] || 0) + 1;
-          });
-        }
-
-        // Find most crowded layer
-        const layerCounts = {};
-        this.data.forEach(o => {
-          layerCounts[o.layer] = (layerCounts[o.layer] || 0) + 1;
-        });
-        const mostCrowded = Object.entries(layerCounts).sort((a,b) => b[1]-a[1])[0];
-
-        // Generate bar chart data (combined ores + crafts)
-        const rarityOrder = ['Default', 'Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic', 'Ethereal', 'Celestial'];
-        const combinedCounts = {};
-        rarityOrder.forEach(r => {
-          combinedCounts[r] = (rarityCounts[r] || 0) + (craftRarityCounts[r] || 0);
-        });
-        const maxCount = Math.max(...Object.values(combinedCounts));
-
-        let html = `
-          <!-- Key Metrics -->
-          <div class="grid grid-cols-2 gap-4">
-            <div class="analytics-card">
-              <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Total Ores</div>
-              <div class="stat-value">${totalOres}</div>
-            </div>
-            <div class="analytics-card">
-              <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Total Crafts</div>
-              <div class="stat-value">${totalCrafts}</div>
-            </div>
-          </div>
-
-          <!-- Rarity Distribution Bar Chart (Ores + Crafts) -->
-          <div class="analytics-card">
-            <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
-              <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-              Distribution (Ores + Crafts)
-            </h3>
-            <div class="bar-chart">
-              ${rarityOrder.map(r => {
-                const count = combinedCounts[r] || 0;
-                const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
-                const color = RarityConfig[r]?.color || '#64748b';
-                return `
-                  <div class="bar" style="height: ${height}%; background: ${color}">
-                    <div class="bar-value">${count}</div>
-                    <div class="bar-label">${r}</div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-            <div class="flex justify-center gap-6 mt-6 text-xs">
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-slate-500"></span>
-                <span class="text-slate-400">Ores: ${totalOres}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
-                <span class="text-slate-400">Crafts: ${totalCrafts}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Rarity Pie Chart (Ores + Crafts) -->
-          <div class="analytics-card">
-            <h3 class="text-sm font-bold text-white mb-4">Composition Overview</h3>
-            <div class="flex items-center gap-6">
-              <div class="pie-chart" style="
-                --default-deg: ${(combinedCounts['Default'] || 0) / (totalOres + totalCrafts) * 360}deg;
-                --common-deg: ${((combinedCounts['Default'] || 0) + (combinedCounts['Common'] || 0)) / (totalOres + totalCrafts) * 360}deg;
-                --uncommon-deg: ${((combinedCounts['Default'] || 0) + (combinedCounts['Common'] || 0) + (combinedCounts['Uncommon'] || 0)) / (totalOres + totalCrafts) * 360}deg;
-                --rare-deg: ${((combinedCounts['Default'] || 0) + (combinedCounts['Common'] || 0) + (combinedCounts['Uncommon'] || 0) + (combinedCounts['Rare'] || 0)) / (totalOres + totalCrafts) * 360}deg;
-                --epic-deg: ${((combinedCounts['Default'] || 0) + (combinedCounts['Common'] || 0) + (combinedCounts['Uncommon'] || 0) + (combinedCounts['Rare'] || 0) + (combinedCounts['Epic'] || 0)) / (totalOres + totalCrafts) * 360}deg;
-                --legendary-deg: ${((combinedCounts['Default'] || 0) + (combinedCounts['Common'] || 0) + (combinedCounts['Uncommon'] || 0) + (combinedCounts['Rare'] || 0) + (combinedCounts['Epic'] || 0) + (combinedCounts['Legendary'] || 0)) / (totalOres + totalCrafts) * 360}deg;
-                --mythic-deg: ${((combinedCounts['Default'] || 0) + (combinedCounts['Common'] || 0) + (combinedCounts['Uncommon'] || 0) + (combinedCounts['Rare'] || 0) + (combinedCounts['Epic'] || 0) + (combinedCounts['Legendary'] || 0) + (combinedCounts['Mythic'] || 0)) / (totalOres + totalCrafts) * 360}deg;
-                --ethereal-deg: ${((combinedCounts['Default'] || 0) + (combinedCounts['Common'] || 0) + (combinedCounts['Uncommon'] || 0) + (combinedCounts['Rare'] || 0) + (combinedCounts['Epic'] || 0) + (combinedCounts['Legendary'] || 0) + (combinedCounts['Mythic'] || 0) + (combinedCounts['Ethereal'] || 0)) / (totalOres + totalCrafts) * 360}deg;
-              ">
-                <div class="pie-center">${totalOres + totalCrafts}</div>
-              </div>
-              <div class="flex-1 space-y-2">
-                ${rarityOrder.map(r => {
-                  const count = combinedCounts[r] || 0;
-                  const pct = ((count / (totalOres + totalCrafts)) * 100).toFixed(1);
-                  const color = RarityConfig[r]?.color || '#64748b';
-                  return `
-                    <div class="flex items-center justify-between text-xs">
-                      <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full" style="background: ${color}"></span>
-                        <span class="text-slate-300">${r}</span>
-                      </div>
-                      <span class="text-slate-500">${pct}%</span>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-          </div>
-
-          <!-- Layer Density Heatmap -->
-          <div class="analytics-card">
-            <h3 class="text-sm font-bold text-white mb-4">Layer Density</h3>
-            <div class="space-y-2">
-              ${Object.entries(layerCounts)
-                .sort((a,b) => b[1] - a[1])
-                .slice(0, 10)
-                .map(([layer, count], i) => {
-                  const width = (count / mostCrowded[1]) * 100;
-                  const heatColor = count > 20 ? '#ef4444' : count > 15 ? '#f59e0b' : count > 10 ? '#10b981' : '#3b82f6';
-                  return `
-                    <div class="flex items-center gap-3">
-                      <span class="text-xs text-slate-400 w-32 truncate">${layer}</span>
-                      <div class="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
-                        <div class="h-full rounded-full transition-all duration-500" style="width: ${width}%; background: ${heatColor}"></div>
-                      </div>
-                      <span class="text-xs font-mono text-slate-500 w-8 text-right">${count}</span>
-                    </div>
-                  `;
-                }).join('')}
-            </div>
-            ${mostCrowded[1] > 25 ? `
-              <div class="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                <div class="flex items-center gap-2 text-amber-400 text-xs">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                  <span>"${mostCrowded[0]}" is overcrowded with ${mostCrowded[1]} ores</span>
-                </div>
-              </div>
-            ` : ''}
-          </div>
-
-          <!-- Insights -->
-          <div class="analytics-card bg-gradient-to-br from-indigo-900/20 to-purple-900/20">
-            <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
-              <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-              Database Overview
-            </h3>
-            <ul class="space-y-2 text-xs text-slate-400">
-              <li class="flex items-start gap-2">
-                <span class="text-green-400">•</span>
-                Total database contains ${totalOres + totalCrafts} items (${totalOres} ores + ${totalCrafts} crafts)
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-blue-400">•</span>
-                Ores span across ${layers.length} unique layers
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-purple-400">•</span>
-                ${mostCrowded ? `Most populated layer: "${mostCrowded[0]}" with ${mostCrowded[1]} ores` : 'Layer distribution is balanced'}
-              </li>
-            </ul>
-          </div>
-        `;
-
-        container.innerHTML = html;
-      }
-
-      exportAnalytics() {
-        const rarityCounts = {};
-        this.data.forEach(o => {
-          rarityCounts[o.rarity] = (rarityCounts[o.rarity] || 0) + 1;
-        });
-
-        const craftRarityCounts = {};
-        if (typeof CRAFTS !== 'undefined') {
-          CRAFTS.forEach(c => {
-            craftRarityCounts[c.rarity] = (craftRarityCounts[c.rarity] || 0) + 1;
-          });
-        }
-
-        const report = {
-          generatedAt: new Date().toISOString(),
-          totalOres: this.data.length,
-          totalCrafts: typeof CRAFTS !== 'undefined' ? CRAFTS.length : 0,
-          totalItems: this.data.length + (typeof CRAFTS !== 'undefined' ? CRAFTS.length : 0),
-          totalLayers: [...new Set(this.data.map(o => o.layer))].length,
-          oreRarityDistribution: rarityCounts,
-          craftRarityDistribution: craftRarityCounts,
-          topLayers: Object.entries(
-            this.data.reduce((acc, o) => {
-              acc[o.layer] = (acc[o.layer] || 0) + 1;
-              return acc;
-            }, {})
-          ).sort((a,b) => b[1] - a[1]).slice(0, 5)
-        };
-
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(report, null, 2));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "miners_world_analytics.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-        this.showToast("Analytics report exported");
-      }
-
-      // Gallery Methods
-      toggleGallery() {
-        const panel = document.getElementById('gallery-panel');
-        const overlay = document.getElementById('gallery-overlay');
-        const isOpen = !panel.classList.contains('translate-x-full');
-
-        if (isOpen) {
-          panel.classList.add('translate-x-full');
-          overlay.classList.add('hidden');
-          overlay.classList.remove('opacity-100');
-        } else {
-          // Close other panels first
-          this.closeAllPanels();
-          panel.classList.remove('translate-x-full');
-          overlay.classList.remove('hidden');
-          setTimeout(() => overlay.classList.add('opacity-100'), 10);
-          this.renderGallery();
-        }
-      }
-
-      renderGallery() {
-        const container = document.getElementById('gallery-content');
-        const submissions = JSON.parse(localStorage.getItem('mw_gallery') || '[]');
-
-        document.getElementById('gallery-count').textContent = `${submissions.length} submission${submissions.length !== 1 ? 's' : ''}`;
-
-        if (submissions.length === 0) {
-          container.innerHTML = `
-            <div class="text-center py-10 opacity-50">
-              <svg class="w-16 h-16 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              <p class="text-slate-400">No submissions yet</p>
-              <p class="text-slate-600 text-sm mt-1">Be the first to share a rare ore!</p>
-            </div>
-          `;
-          return;
-        }
-
-        // Sort by newest first
-        const sorted = submissions.reverse();
-
-        container.innerHTML = sorted.map((sub, idx) => {
-          const color = RarityConfig[sub.rarity]?.color || '#64748b';
-          const date = new Date(sub.timestamp).toLocaleDateString();
-
-          return `
-            <div class="gallery-item">
-              <div class="relative">
-                <img src="${sub.image}" class="gallery-image" onclick="app.openLightbox('${sub.image}')" alt="${sub.oreName}">
-                <button onclick="app.deleteSubmission(${submissions.length - 1 - idx})" class="gallery-delete absolute top-2 right-2 p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg backdrop-blur-sm">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-              </div>
-              <div class="p-3">
-                <div class="flex items-center justify-between mb-2">
-                  <h4 class="font-bold text-white text-sm truncate">${sub.oreName}</h4>
-                  <span class="gallery-badge" style="color: ${color}; border: 1px solid ${color}; background: ${color}20">${sub.rarity}</span>
-                </div>
-                ${sub.notes ? `<p class="text-xs text-slate-400 mb-2">${sub.notes}</p>` : ''}
-                <div class="flex items-center justify-between text-xs text-slate-500">
-                  <span>${date}</span>
-                  ${sub.verified ? '<span class="text-emerald-400 flex items-center gap-1"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Verified</span>' : ''}
-                </div>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      openUploadModal() {
-        // Populate ore select with ethereal, celestial, and zenith ores
-        const select = document.getElementById('upload-ore-select');
-        const rareOres = this.data.filter(o => ['Ethereal', 'Celestial', 'Zenith'].includes(o.rarity));
-
-        select.innerHTML = '<option value="">Select ore...</option>' +
-          rareOres.map(o => `<option value="${o.name}" data-rarity="${o.rarity}">${o.name} (${o.rarity})</option>`).join('');
-
-        // Auto-select rarity when ore is chosen
-        select.onchange = (e) => {
-          const selected = rareOres.find(o => o.name === e.target.value);
-          if (selected) {
-            document.getElementById('upload-rarity-select').value = selected.rarity;
-          }
-        };
-
-        const modal = document.getElementById('upload-modal');
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          modal.classList.remove('opacity-0');
-          modal.querySelector('div').classList.remove('scale-95');
-          modal.querySelector('div').classList.add('scale-100');
-        });
-      }
-
-      closeUploadModal() {
-        const modal = document.getElementById('upload-modal');
-        modal.classList.add('opacity-0');
-        modal.querySelector('div').classList.remove('scale-100');
-        modal.querySelector('div').classList.add('scale-95');
-
-        setTimeout(() => {
-          modal.classList.add('hidden');
-          this.resetUploadForm();
-        }, 300);
-      }
-
-      resetUploadForm() {
-        document.getElementById('upload-ore-select').value = '';
-        document.getElementById('upload-rarity-select').value = 'Ethereal';
-        document.getElementById('upload-file').value = '';
-        document.getElementById('upload-notes').value = '';
-        document.getElementById('file-label').textContent = 'Click to upload image';
-        document.getElementById('image-preview').classList.add('hidden');
-        this.currentUploadFile = null;
-      }
-
-      handleFileSelect(input) {
-        const file = input.files[0];
-        if (!file) return;
-
-        if (!file.type.startsWith('image/')) {
-          this.showToast('Please select an image file');
-          return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) {
-          this.showToast('Image must be under 5MB');
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.currentUploadFile = e.target.result;
-          document.getElementById('preview-img').src = e.target.result;
-          document.getElementById('image-preview').classList.remove('hidden');
-          document.getElementById('file-label').textContent = file.name;
-        };
-        reader.readAsDataURL(file);
-      }
-
-      submitScreenshot() {
-        const oreName = document.getElementById('upload-ore-select').value;
-        const rarity = document.getElementById('upload-rarity-select').value;
-        const notes = document.getElementById('upload-notes').value;
-
-        if (!oreName) {
-          this.showToast('Please select an ore');
-          return;
-        }
-
-        if (!this.currentUploadFile) {
-          this.showToast('Please upload a screenshot');
-          return;
-        }
-
-        const submission = {
-          id: Date.now(),
-          oreName,
-          rarity,
-          image: this.currentUploadFile,
-          notes,
-          timestamp: new Date().toISOString(),
-          verified: false
-        };
-
-        const submissions = JSON.parse(localStorage.getItem('mw_gallery') || '[]');
-        submissions.push(submission);
-        localStorage.setItem('mw_gallery', JSON.stringify(submissions));
-
-        this.closeUploadModal();
-        this.renderGallery();
-        this.showToast('Screenshot submitted successfully!');
-
-        // Auto-open gallery to show new submission
-        const panel = document.getElementById('gallery-panel');
-        if (panel.classList.contains('translate-x-full')) {
-          this.toggleGallery();
-        }
-      }
-
-      deleteSubmission(index) {
-        if (!confirm('Delete this submission?')) return;
-
-        const submissions = JSON.parse(localStorage.getItem('mw_gallery') || '[]');
-        submissions.splice(index, 1);
-        localStorage.setItem('mw_gallery', JSON.stringify(submissions));
-        this.renderGallery();
-        this.showToast('Submission deleted');
-      }
-
-      openLightbox(imageSrc) {
-        const lightbox = document.createElement('div');
-        lightbox.className = 'lightbox';
-        lightbox.onclick = () => lightbox.remove();
-        lightbox.innerHTML = `<img src="${imageSrc}" onclick="event.stopPropagation()">`;
-        document.body.appendChild(lightbox);
-      }
-
-      // Panel Management
-      closeAllPanels() {
-        // Safe Helper
-        const closePanel = (id) => {
-           const el = document.getElementById(id);
-           if(el) el.classList.add('translate-x-full');
-        };
-        const hideOverlay = (id) => {
-           const el = document.getElementById(id);
-           if(el) {
-               el.classList.add('hidden');
-               el.classList.remove('opacity-100');
-           }
-        };
-
-        // Close Depth Simulator
-        closePanel('depth-simulator');
-        hideOverlay('depth-overlay');
-
-        // Close Analytics
-        closePanel('analytics-panel');
-        hideOverlay('analytics-overlay');
-
-        // Close Gallery
-        closePanel('gallery-panel');
-        hideOverlay('gallery-overlay');
-
-        // Close Sidebar
-        const sb = document.getElementById('sidebar');
-        if (sb && !sb.classList.contains('-translate-x-full')) {
-            sb.classList.add('-translate-x-full');
-        }
-        const mobOver = document.getElementById('mobile-overlay');
-        if(mobOver) mobOver.classList.add('hidden');
-
-        document.body.style.overflow = '';
-      }
-
-      // Report Missing Ore/Craft Methods
-      openReportModal() {
-        // Close all slide-out panels first
-        this.closeAllPanels();
-        const modal = document.getElementById('report-modal');
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          modal.classList.remove('opacity-0');
-          modal.querySelector('div').classList.remove('scale-95');
-          modal.querySelector('div').classList.add('scale-100');
-        });
-
-        // Set default report type to 'ore'
-        this.setReportType('ore');
-
-        // Toggle file section visibility
-        document.getElementById('report-screenshot').onchange = (e) => {
-          document.getElementById('report-file-section').classList.toggle('hidden', !e.target.checked);
-        };
-      }
-
-      setReportType(type) {
-        this.currentReportType = type;
-        const oreBtn = document.getElementById('report-type-ore');
-        const craftBtn = document.getElementById('report-type-craft');
-        const nameLabel = document.getElementById('report-name-label');
-        const layerSection = document.getElementById('report-layer-section');
-
-        if (type === 'ore') {
-          oreBtn.classList.add('bg-orange-600', 'text-white', 'border-orange-500');
-          oreBtn.classList.remove('bg-slate-800', 'text-slate-400', 'border-slate-700');
-          craftBtn.classList.remove('bg-orange-600', 'text-white', 'border-orange-500');
-          craftBtn.classList.add('bg-slate-800', 'text-slate-400', 'border-slate-700');
-          nameLabel.textContent = 'Ore Name *';
-          layerSection.classList.remove('hidden');
-        } else {
-          craftBtn.classList.add('bg-orange-600', 'text-white', 'border-orange-500');
-          craftBtn.classList.remove('bg-slate-800', 'text-slate-400', 'border-slate-700');
-          oreBtn.classList.remove('bg-orange-600', 'text-white', 'border-orange-500');
-          oreBtn.classList.add('bg-slate-800', 'text-slate-400', 'border-slate-700');
-          nameLabel.textContent = 'Craft Name *';
-          layerSection.classList.add('hidden');
-        }
-      }
-
-      closeReportModal() {
-        const modal = document.getElementById('report-modal');
-        modal.classList.add('opacity-0');
-        modal.querySelector('div').classList.remove('scale-100');
-        modal.querySelector('div').classList.add('scale-95');
-
-        setTimeout(() => {
-          modal.classList.add('hidden');
-          this.resetReportForm();
-        }, 300);
-      }
-
-      resetReportForm() {
-        document.getElementById('report-ore-name').value = '';
-        document.getElementById('report-rarity').value = '';
-        document.getElementById('report-layer').value = '';
-        document.getElementById('report-description').value = '';
-        document.getElementById('report-screenshot').checked = false;
-        document.getElementById('report-file').value = '';
-        document.getElementById('report-file-section').classList.add('hidden');
-        document.getElementById('report-file-label').textContent = 'Click to upload screenshot';
-        document.getElementById('report-image-preview').classList.add('hidden');
-        this.currentReportFile = null;
-        this.currentReportType = 'ore';
-      }
-
-      handleReportFile(input) {
-        const file = input.files[0];
-        if (!file) return;
-
-        if (!file.type.startsWith('image/')) {
-          this.showToast('Please select an image file');
-          return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) {
-          this.showToast('Image must be under 5MB');
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.currentReportFile = e.target.result;
-          document.getElementById('report-preview-img').src = e.target.result;
-          document.getElementById('report-image-preview').classList.remove('hidden');
-          document.getElementById('report-file-label').textContent = file.name;
-        };
-        reader.readAsDataURL(file);
-      }
-
-      async submitReport() {
-        this.showToast("Reporting has been disabled.");
-        this.closeReportModal();
-      }
-      // --- MODAL FUNCTIONS FOR ABOUT, PRIVACY, TERMS, DSA ---
-
-      openAboutModal() {
-        const modal = document.getElementById('about-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => {
-          modal.classList.remove('opacity-0');
-          modal.querySelector('div').classList.remove('scale-95');
-          modal.querySelector('div').classList.add('scale-100');
-        }, 10);
-      }
-
-      closeAboutModal() {
-        const modal = document.getElementById('about-modal');
-        modal.classList.add('opacity-0');
-        modal.querySelector('div').classList.remove('scale-100');
-        modal.querySelector('div').classList.add('scale-95');
-        setTimeout(() => {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }, 300);
-      }
-
-      openPrivacyModal() {
-        const modal = document.getElementById('privacy-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => {
-          modal.classList.remove('opacity-0');
-          modal.querySelector('div').classList.remove('scale-95');
-          modal.querySelector('div').classList.add('scale-100');
-        }, 10);
-      }
-
-      closePrivacyModal() {
-        const modal = document.getElementById('privacy-modal');
-        modal.classList.add('opacity-0');
-        modal.querySelector('div').classList.remove('scale-100');
-        modal.querySelector('div').classList.add('scale-95');
-        setTimeout(() => {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }, 300);
-      }
-
-      openTermsModal() {
-        const modal = document.getElementById('terms-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => {
-          modal.classList.remove('opacity-0');
-          modal.querySelector('div').classList.remove('scale-95');
-          modal.querySelector('div').classList.add('scale-100');
-        }, 10);
-      }
-
-      closeTermsModal() {
-        const modal = document.getElementById('terms-modal');
-        modal.classList.add('opacity-0');
-        modal.querySelector('div').classList.remove('scale-100');
-        modal.querySelector('div').classList.add('scale-95');
-        setTimeout(() => {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }, 300);
-      }
-
-      openDSAModal() {
-        const modal = document.getElementById('dsa-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => {
-          modal.classList.remove('opacity-0');
-          modal.querySelector('div').classList.remove('scale-95');
-          modal.querySelector('div').classList.add('scale-100');
-        }, 10);
-      }
-
-      closeDSAModal() {
-        const modal = document.getElementById('dsa-modal');
-        modal.classList.add('opacity-0');
-        modal.querySelector('div').classList.remove('scale-100');
-        modal.querySelector('div').classList.add('scale-95');
-        setTimeout(() => {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }, 300);
-      }
-
-      // --- CRAFT MODAL FUNCTIONS ---
-      openCraftModal(craft) {
-        this.currentCraftModalItem = craft;
-
-        const color = RarityConfig[craft.rarity]?.color || '#64748b';
-
-        document.getElementById('craft-modal-title').innerText = craft.name;
-        document.getElementById('craft-modal-description').innerText = craft.description || 'No description available.';
-
-        // Rarity Styling
-        const badge = document.getElementById('craft-modal-rarity-badge');
-        badge.innerText = craft.rarity;
-        badge.style.color = color;
-        badge.style.borderColor = color;
-        badge.style.backgroundColor = color + '15';
-
-        document.getElementById('craft-modal-header-stripe').style.backgroundColor = color;
-
-        // Render requirements with ore rarities
-        const reqContainer = document.getElementById('craft-modal-requirements');
-        if (craft.requirements && craft.requirements.length > 0) {
-          let reqHtml = '<h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Required Materials</h3><div class="space-y-2">';
-
-          craft.requirements.forEach(req => {
-            // Look up the ore in RAW_ORES to find its rarity
-            const oreData = RAW_ORES.find(o => o.name.toLowerCase() === req.block.toLowerCase());
-            const oreRarity = oreData ? oreData.rarity : 'Unknown';
-            const oreColor = RarityConfig[oreRarity]?.color || '#64748b';
-
-            reqHtml += `
-              <div class="flex items-center justify-between bg-slate-950/50 p-3 rounded-lg border border-slate-800">
-                <div class="flex items-center gap-3">
-                  <div class="w-2 h-8 rounded-full" style="background-color: ${oreColor}"></div>
-                  <div>
-                    <span class="text-white font-medium">${req.block}</span>
-                    <span class="text-xs ml-2 px-2 py-0.5 rounded-full border" style="color: ${oreColor}; border-color: ${oreColor}40; background: ${oreColor}15">${oreRarity}</span>
-                  </div>
-                </div>
-                <span class="text-lg font-bold font-mono" style="color: ${color}">${req.amount.toLocaleString()}</span>
-              </div>
-            `;
-          });
-
-          reqHtml += '</div>';
-          reqContainer.innerHTML = reqHtml;
-        } else {
-          reqContainer.innerHTML = `
-            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Required Materials</h3>
-            <div class="flex items-center gap-2 text-slate-500 bg-slate-950/30 rounded-lg p-4 border border-dashed border-slate-800">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-              <span>No crafting requirements needed</span>
-            </div>
-          `;
-        }
-
-        const backdrop = document.getElementById('craft-modal-backdrop');
-        const panel = document.getElementById('craft-modal-panel');
-
-        backdrop.classList.remove('hidden');
-        backdrop.classList.add('flex');
-        requestAnimationFrame(() => {
-          backdrop.classList.remove('opacity-0');
-          panel.classList.remove('scale-95');
-          panel.classList.add('scale-100');
-        });
-      }
-
-      closeCraftModal() {
-        const backdrop = document.getElementById('craft-modal-backdrop');
-        const panel = document.getElementById('craft-modal-panel');
-
-        backdrop.classList.add('opacity-0');
-        panel.classList.remove('scale-100');
-        panel.classList.add('scale-95');
-
-        setTimeout(() => {
-          backdrop.classList.add('hidden');
-          backdrop.classList.remove('flex');
-          this.currentCraftModalItem = null;
-        }, 300);
       }
     }
 
-    // --- 3. INITIALIZE ---
+    // --- 3. START APP ---
     const app = new App();
 
-    // Event Listeners for Search Debounce
     let debounce;
     document.getElementById('search-input').addEventListener('input', (e) => {
       clearTimeout(debounce);
@@ -2253,7 +1199,6 @@
       }, 250);
     });
 
-    // Close modal on escape
     document.addEventListener('keydown', (e) => {
       if(e.key === 'Escape') {
         app.closeModal();
@@ -2262,227 +1207,5 @@
     });
 
   </script>
-
-<script>
-    // 2. THE MEMORY CHECK (Toast Removed)
-    window.addEventListener('DOMContentLoaded', () => {
-        const main = document.getElementById('main-wrapper');
-        const blackout = document.getElementById('blackout-style');
-
-        // Ensure blackout is removed if it still exists
-        if(blackout) blackout.remove();
-        
-        // Ensure main is visible
-        if(main) {
-            main.style.setProperty('display', 'block', 'important');
-            main.style.visibility = 'visible';
-        }
-    });
-</script>
-
-<script>
-// Crafts View Functionality
-(function() {
-  // Track current view mode on the app instance so all methods can access it
-  if (typeof app !== 'undefined') {
-    app.currentView = 'ores';
-    app.craftsData = (typeof CRAFTS !== 'undefined') ? CRAFTS : [];
-    app.craftsSortBy = 'rarity_desc';
-    app.craftsActiveRarities = new Set();
-
-    app.switchView = function(view) {
-      const tabOres = document.getElementById('tab-ores');
-      const tabCrafts = document.getElementById('tab-crafts');
-      const searchInput = document.getElementById('search-input');
-
-      if (view === 'crafts') {
-        app.currentView = 'crafts';
-        if (tabOres) {
-          tabOres.classList.remove('bg-indigo-600', 'text-white');
-          tabOres.classList.add('bg-slate-800', 'text-slate-400');
-        }
-        if (tabCrafts) {
-          tabCrafts.classList.add('bg-indigo-600', 'text-white');
-          tabCrafts.classList.remove('bg-slate-800', 'text-slate-400');
-        }
-        if (searchInput) searchInput.placeholder = 'Search crafts...';
-        requestAnimationFrame(() => app.renderCrafts());
-      } else {
-        app.currentView = 'ores';
-        if (tabCrafts) {
-          tabCrafts.classList.remove('bg-indigo-600', 'text-white');
-          tabCrafts.classList.add('bg-slate-800', 'text-slate-400');
-        }
-        if (tabOres) {
-          tabOres.classList.add('bg-indigo-600', 'text-white');
-          tabOres.classList.remove('bg-slate-800', 'text-slate-400');
-        }
-        if (searchInput) searchInput.placeholder = 'Search ores, depths, or IDs...';
-        requestAnimationFrame(() => app._originalRender.call(app));
-      }
-    };
-
-    app._originalHandleSort = app.handleSort;
-    app.handleSort = function() {
-      const sortValue = document.getElementById('sort-select').value;
-      if (app.currentView === 'crafts') {
-        app.craftsSortBy = sortValue;
-        app.renderCrafts();
-      } else {
-        app.sortBy = sortValue;
-        app._originalRender.call(app);
-      }
-    };
-
-    app._originalRender = app.render;
-    app.render = function(isAppend) {
-      if (app.currentView === 'crafts') {
-        app.renderCrafts();
-      } else {
-        app._originalRender.call(app, isAppend);
-      }
-    };
-  }
-
-app.renderCrafts = function() {
-    const grid = document.getElementById('results-grid');
-    if (!grid || typeof CRAFTS === 'undefined') {
-      console.error('Grid or CRAFTS data not found');
-      return;
-    }
-
-    // Grid layout vs List layout classes
-    grid.className = app.viewMode === 'grid' 
-      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pb-10"
-      : "flex flex-col gap-2 pb-10";
-
-    const rarityConfig = {
-      'Default': { color: '#64748b', rank: 0, bg: 'rgba(100, 116, 139, 0.1)', icon: '⚫' },
-      'Common': { color: '#cbd5e1', rank: 1, bg: 'rgba(203, 213, 225, 0.1)', icon: '⚪' },
-      'Uncommon': { color: '#4ade80', rank: 2, bg: 'rgba(74, 222, 128, 0.1)', icon: '🟢' },
-      'Rare': { color: '#3b82f6', rank: 3, bg: 'rgba(59, 130, 246, 0.1)', icon: '🔵' },
-      'Epic': { color: '#a855f7', rank: 4, bg: 'rgba(168, 85, 247, 0.1)', icon: '🟣' },
-      'Legendary': { color: '#fbbf24', rank: 5, bg: 'rgba(251, 191, 36, 0.1)', icon: '🟡' },
-      'Mythic': { color: '#ef4444', rank: 6, bg: 'rgba(239, 68, 68, 0.1)', icon: '🔴' },
-      'Ethereal': { color: '#ec4899', rank: 7, bg: 'rgba(236, 72, 153, 0.1)', icon: '💖' },
-      'Celestial': { color: '#06b6d4', rank: 8, bg: 'rgba(6, 182, 212, 0.1)', icon: '✨' },
-      'Zenith': { color: '#800080', rank: 9, bg: 'rgba(128, 0, 128, 0.1)', icon: '👑' }
-    };
-
-    const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
-
-    let filteredCrafts = CRAFTS.map(c => ({...c, rarityRank: rarityConfig[c.rarity]?.rank || 0}));
-
-    if (searchTerm) {
-      filteredCrafts = filteredCrafts.filter(c => 
-        c.name.toLowerCase().includes(searchTerm) ||
-        (c.description && c.description.toLowerCase().includes(searchTerm))
-      );
-    }
-
-    if (app.craftsActiveRarities && app.craftsActiveRarities.size > 0) {
-      filteredCrafts = filteredCrafts.filter(c => app.craftsActiveRarities.has(c.rarity));
-    }
-
-    filteredCrafts.sort((a, b) => {
-      switch(app.craftsSortBy) {
-        case 'name_asc': return a.name.localeCompare(b.name);
-        case 'rarity_asc': return a.rarityRank - b.rarityRank;
-        case 'rarity_desc': return b.rarityRank - a.rarityRank;
-        default: return 0;
-      }
-    });
-
-    if (filteredCrafts.length === 0) {
-      grid.innerHTML = `
-        <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
-          <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center mb-4">
-            <svg class="w-10 h-10 text-slate-400 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          </div>
-          <h3 class="text-xl font-bold text-slate-700 dark:text-slate-300 mb-2">No Crafts Found</h3>
-          <p class="text-slate-500">Try adjusting your search query.</p>
-        </div>`;
-      return;
-    }
-
-    grid.innerHTML = filteredCrafts.map(craft => {
-      const config = rarityConfig[craft.rarity] || { color: '#64748b', bg: 'rgba(100, 116, 139, 0.1)', icon: '⚪' };
-      const reqCount = craft.requirements ? craft.requirements.length : 0;
-      const craftJson = JSON.stringify(craft).replace(/"/g, '&quot;');
-
-      if (app.viewMode === 'list') {
-        // --- LIST VIEW (Theme Aware) ---
-        return `
-          <div onclick="app.openCraftModal(${craftJson})" class="flex items-center gap-4 p-3 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer group transition-colors shadow-sm dark:shadow-none">
-            <div class="w-1 h-8 rounded-full" style="background-color: ${config.color}"></div>
-            <div class="flex-1 min-w-0">
-              <h4 class="font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-indigo-600 dark:group-hover:text-white">${craft.name}</h4>
-              <div class="text-xs text-slate-500 truncate">${reqCount} Requirements</div>
-            </div>
-            <div class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 whitespace-nowrap" style="color:${config.color}">${craft.rarity}</div>
-          </div>
-        `;
-      } else {
-        // --- GRID VIEW (Theme Aware) ---
-        return `
-          <div onclick="app.openCraftModal(${craftJson})" class="group relative bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-2xl cursor-pointer" style="--glow-color: ${config.color}">
-            
-            <div class="h-1.5 w-full" style="background: linear-gradient(90deg, ${config.color} 0%, ${config.color}88 100%)"></div>
-
-            <div class="p-5">
-              <div class="flex items-start gap-3 mb-3">
-                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0" style="background: ${config.bg}; box-shadow: 0 0 20px ${config.color}30;">
-                  ${config.icon}
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h3 class="text-lg font-bold text-slate-800 dark:text-white leading-tight truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">${craft.name}</h3>
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide mt-1" style="color: ${config.color}; background: ${config.bg}; border: 1px solid ${config.color}40;">
-                    <span class="w-1.5 h-1.5 rounded-full" style="background: ${config.color}"></span>
-                    ${craft.rarity}
-                  </span>
-                </div>
-              </div>
-
-              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4 line-clamp-3">${craft.description || 'No description available.'}</p>
-
-              ${craft.requirements ? `
-                <div class="bg-slate-50 dark:bg-slate-950/60 rounded-xl p-3 border border-slate-200 dark:border-slate-800/50">
-                  <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Requirements (${reqCount})</span>
-                  </div>
-                  <div class="space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar">
-                    ${craft.requirements.map(req => `
-                      <div class="flex items-center justify-between bg-white dark:bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-                        <span class="text-sm text-slate-700 dark:text-slate-300 truncate mr-2">${req.block}</span>
-                        <span class="text-sm font-bold font-mono shrink-0" style="color: ${config.color}">${req.amount.toLocaleString()}</span>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              ` : `
-                <div class="flex items-center gap-2 text-slate-500 dark:text-slate-600 bg-slate-50 dark:bg-slate-950/30 rounded-xl p-3 border border-dashed border-slate-200 dark:border-slate-800">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                  <span class="text-xs italic">No crafting requirements</span>
-                </div>
-              `}
-            </div>
-
-            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style="background: radial-gradient(circle at 50% 0%, ${config.color}15 0%, transparent 60%);"></div>
-          </div>
-        `;
-      }
-    }).join('');
-
-    // Update total count
-    const totalCount = document.getElementById('total-count');
-    if (totalCount) totalCount.textContent = filteredCrafts.length + ' Crafts';
-  }
-
-  // Hook into search input for crafts - now handled by main app.render dispatch
-  // The original search handler will call app.render() which dispatches to correct view
-
-})();
-</script>
 </body>
 </html>
