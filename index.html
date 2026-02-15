@@ -1,1211 +1,337 @@
-<!doctype html>
-<html lang="en" class="dark">
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>Miners World: Darkwired</title>
-  <script>
-    if (localStorage.getItem("mw_authorized") !== "true") {
-        localStorage.setItem("mw_authorized", "true");
-        console.log("Miners World: Authorization patched automatically.");
-    }
-  </script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' },
-          },
-          animation: {
-            'fade-in': 'fadeIn 0.3s ease-out forwards',
-            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'pulse-soft': 'pulseSoft 3s infinite',
-          },
-          keyframes: {
-            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-            slideUp: { '0%': { transform: 'translateY(15px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
-            pulseSoft: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0.7' } }
-          }
-        }
-      }
-    }
-  </script>
-
-  <style>
-    :root {
-      --scrollbar-width: 6px;
-    }
-
-    body {
-        -webkit-font-smoothing: antialiased;
-        text-rendering: optimizeLegibility;
-    }
-
-    /* Modern Scrollbar */
-    ::-webkit-scrollbar { width: var(--scrollbar-width); height: var(--scrollbar-width); }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.5); border-radius: 99px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 0.8); }
-
-    /* Glassmorphism Refined */
-    .glass {
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .glass-strong {
-      background: rgba(2, 6, 23, 0.9);
-      backdrop-filter: blur(24px);
-      border-right: 1px solid rgba(255, 255, 255, 0.03);
-    }
-
-    /* Interactive Elements */
-    .clickable {
-        transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
-    }
-    .clickable:active {
-        transform: scale(0.97);
-    }
-
-    /* Card Glows */
-    .card-glow {
-        position: relative;
-        isolation: isolate;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(255,255,255,0.03);
-    }
-    .card-glow:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 15px 30px -10px rgba(0,0,0,0.5), 
-                    0 0 20px -5px var(--glow-color);
-        border-color: var(--glow-color);
-        z-index: 10;
-    }
-    .card-glow::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(800px circle at var(--mouse-x, center) var(--mouse-y, center), rgba(255,255,255,0.03), transparent 40%);
-        opacity: 0;
-        transition: opacity 0.5s;
-        z-index: -1;
-    }
-    .card-glow:hover::before {
-        opacity: 1;
-    }
-
-    /* Divine Rarity Special Styling */
-    .text-divine {
-        color: #e2e8f0 !important;
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    }
-
-    /* Depth Simulator Custom */
-    .depth-layer {
-      position: relative;
-      transition: all 0.2s ease;
-      background: linear-gradient(90deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0) 100%);
-    }
-    .depth-layer:hover {
-      background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(15, 23, 42, 0) 100%);
-      padding-left: 1.25rem !important; /* Visual indentation on hover */
-    }
-    .depth-gradient-bar {
-        background: linear-gradient(to bottom, #0ea5e9, #22d3ee, #10b981, #f59e0b, #ef4444, #7c3aed);
-    }
-
-    /* Utility */
-    .text-shadow-sm { text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-
-    /* Selection */
-    ::selection { background: rgba(99, 102, 241, 0.3); color: #fff; }
-
-  </style>
-<base target="_blank">
+<meta charset="utf-8" />
+<title>block discovery dashboard</title>
+<style>
+:root {
+    --bg: #0b0b0b;
+    --card: #161616;
+    --text: #eee;
+    --dim: #888;
+    --ethereal: #ff69b4;
+    --celestial: #87cefa;
+    --zenith: #9d00ff;
+    --divine: #ffffff;
+    --nil: #555555;
+    --mythic: #ff4444;
+    --legendary: #f1f500;
+    --gold: #ffd700;
+    --silver: #c0c0c0;
+    --bronze: #cd7f32;
+    --default-rank: #2a2a2a;
+}
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    padding: 20px;
+    line-height: 1.5;
+    margin: 0;
+}
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+.tab-btn {
+    background: none;
+    border: none;
+    color: var(--dim);
+    cursor: pointer;
+    padding: 8px 16px;
+    font-weight: 700;
+    font-size: .9em;
+    text-transform: uppercase;
+    border-radius: 4px;
+}
+.tab-btn.active {
+    color: var(--ethereal);
+    background: rgba(255,105,180,.08);
+}
+.header-stats {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 15px;
+    margin-bottom: 14px;
+}
+.stat-card {
+    background: var(--card);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    text-align: center;
+    min-height: 64px;
+}
+.stat-card h4 {
+    margin: 0;
+    font-size: .7em;
+    text-transform: uppercase;
+    color: var(--dim);
+}
+.stat-card p {
+    margin: 5px 0 0;
+    font-size: 1.4em;
+    font-weight: 600;
+}
+#rarity-controls {
+    display: none;
+    margin: 12px 0 18px;
+}
+.rarity-select {
+    background: var(--card);
+    border: 1px solid #333;
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    background: var(--card);
+    border: 1px solid #333;
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+    outline: none;
+}
+.user-card {
+    background: var(--card);
+    border: 1px solid #222;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+.rank-gold {
+    border-left: 5px solid var(--gold);
+}
+.rank-silver {
+    border-left: 5px solid var(--silver);
+}
+.rank-bronze {
+    border-left: 5px solid var(--bronze);
+}
+.rank-other {
+    border-left: 5px solid var(--default-rank);
+}
+.user-header {
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+.user-header:hover {
+    background: #222;
+}
+.username {
+    font-weight: 600;
+    font-size: 1.05em;
+    color: #fff;
+}
+.total-count {
+    font-family: monospace;
+    font-size: 1.05em;
+    font-weight: 600;
+}
+.val-ethereal { color: var(--ethereal); text-shadow:0 0 8px rgba(255,105,180,.5); font-weight:700; }
+.val-celestial { color: var(--celestial); text-shadow:0 0 8px rgba(135,206,250,.5); font-weight:700; }
+.val-zenith { color: var(--zenith); text-shadow:0 0 8px rgba(157,0,255,.5); font-weight:700; }
+.val-divine { color: var(--divine); text-shadow:0 0 8px rgba(255,255,255,.5); font-weight:700; }
+.val-nil { color: var(--nil); font-weight:700; }
+.val-mythic { color: var(--mythic); text-shadow:0 0 8px rgba(255,68,68,.5); font-weight:700; }
+.val-legendary { color: var(--legendary); text-shadow:0 0 8px rgba(241,245,0,.5); font-weight:700; }
+.details { display: none; padding: 18px; background: #0f0f0f; border-top: 1px solid #222; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.stat-item { padding: 6px 0; border-bottom:1px solid #1a1a1a; font-size: .9em; }
+.stat-row { display:flex; justify-content: space-between; align-items: center; }
+h3 { font-size: .75em; text-transform: uppercase; color: var(--dim); border-bottom:1px solid #333; padding-bottom:6px; margin-bottom:8px; }
+#status { text-align:center; color:var(--dim); font-size:.8em; margin-top:8px; }
+.small-muted { color: var(--dim); font-size:.9em; }
+</style>
 </head>
-
-<body class="bg-[#050608] text-slate-300 h-screen flex overflow-hidden font-sans selection:bg-indigo-500/30">
-
-  <!-- Mobile Overlay -->
-  <div id="mobile-overlay" class="fixed inset-0 bg-black/80 z-40 hidden backdrop-blur-sm transition-all duration-300" onclick="app.toggleMobileMenu()"></div>
-
-  <!-- Sidebar -->
-  <aside id="sidebar" class="fixed inset-y-0 left-0 w-80 glass-strong z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col h-full shadow-2xl border-r border-slate-800/50">
-    
-    <!-- Sidebar Header -->
-    <div class="p-6 shrink-0 relative overflow-hidden">
-      <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-          <svg class="w-32 h-32 text-indigo-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 19h20L12 2zm0 3.5l6.5 11.5h-13L12 5.5z"/></svg>
-      </div>
-      <div class="flex items-center gap-4 relative z-10">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 ring-1 ring-white/10">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+<body>
+<div class="container">
+    <div class="header-stats">
+        <div class="stat-card">
+            <h4>total discoveries</h4>
+            <p id="stat-total">0</p>
         </div>
-        <div>
-            <h1 class="text-xl font-bold tracking-tight text-white leading-none">MINERS WORLD</h1>
-            <p class="text-[10px] font-mono text-slate-500 mt-1 tracking-widest uppercase">Database v3.0.3</p>
+        <div class="stat-card">
+            <h4>top explorer</h4>
+            <p id="stat-top" style="color:var(--gold)">-</p>
         </div>
-      </div>
+        <div class="stat-card" id="stat-rarity-card">
+            <h4 id="stat-rarity-name">ethereals found</h4>
+            <p id="stat-rarity-count" style="color:var(--ethereal)">0</p>
+        </div>
     </div>
-
-    <!-- Navigation -->
-    <div class="flex-1 overflow-y-auto px-4 py-2 space-y-6 custom-scrollbar">
-      
-      <!-- Stats Widget -->
-      <div class="bg-slate-900/40 rounded-2xl p-4 border border-slate-800/60 backdrop-blur-sm">
-        <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 flex justify-between items-center">
-          Overview
-          <span id="total-count" class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px]">Loading...</span>
-        </h3>
-        <div id="stats-container" class="space-y-2.5">
-            <!-- Stats injected via JS -->
-        </div>
-      </div>
-
-      <!-- Favorites Toggle -->
-      <button id="btn-favs" onclick="app.toggleFavoritesMode()" class="clickable w-full flex items-center justify-between p-3.5 rounded-xl border border-slate-700/50 bg-slate-900/20 hover:bg-slate-800 hover:border-slate-600 transition-all group">
-        <div class="flex items-center gap-3">
-             <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-             </div>
-             <div class="text-left">
-                 <span class="block text-sm font-semibold text-slate-200 group-hover:text-white">Favorites</span>
-                 <span class="text-[10px] text-slate-500">Your saved items</span>
-             </div>
-        </div>
-        <span id="fav-count-badge" class="bg-amber-500 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full opacity-0 transition-opacity">0</span>
-      </button>
-
-      <!-- Layer Filters -->
-      <div>
-        <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 pl-1">Filter Layers</h3>
-        <div id="layer-list" class="space-y-1"></div>
-      </div>
-
-      <!-- Rarity Filters -->
-      <div>
-        <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 pl-1">Filter Rarity</h3>
-        <div id="rarity-list" class="flex flex-wrap gap-2"></div>
-      </div>
-
-  </div>
-
-  <!-- Sidebar Footer -->
-  <div class="p-4 border-t border-slate-800/60 bg-slate-900/30 shrink-0">  
-    <button onclick="app.toggleDepthSimulator()" id="btn-depth-sim" class="clickable w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-bold shadow-lg shadow-cyan-900/20 transition-all flex items-center justify-center gap-2 group ring-1 ring-white/10">
-      <svg class="w-5 h-5 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-      Geological Map
-    </button>
-  </div>
-</aside>
-
-   <!-- Main Content -->
-   <main id="main-wrapper" class="flex-1 flex flex-col h-full relative md:ml-80 bg-gradient-to-b from-[#050608] via-[#0a0f1c] to-[#050608]">
-       
-       <!-- Header -->
-       <header class="h-20 border-b border-slate-800/60 bg-[#050608]/80 backdrop-blur-xl flex items-center justify-between px-6 z-30 shrink-0">
-      
-        <!-- Mobile Toggle -->
-        <button onclick="app.toggleMobileMenu()" class="md:hidden p-2 -ml-2 text-slate-400 hover:text-white transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-
-        <!-- Search Bar -->
-        <div class="flex-1 max-w-xl relative group mx-4 md:mx-0">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </div>
-            <input type="text" id="search-input" placeholder="Search..." 
-            class="block w-full pl-10 pr-3 py-2.5 border border-slate-800 rounded-xl leading-5 bg-slate-900/50 text-slate-300 placeholder-slate-600 focus:outline-none focus:bg-slate-900 focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 sm:text-sm transition-all shadow-inner">
-        </div>
-
-        <!-- Right Actions -->
-        <div class="flex items-center gap-4 ml-4">
-            
-            <!-- View Toggle -->
-            <div class="hidden sm:flex bg-slate-900/50 p-1 rounded-lg border border-slate-800/60">
-                <button onclick="app.setView('grid')" id="view-grid" class="p-2 rounded-md bg-slate-800 text-white shadow-sm ring-1 ring-white/5 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                </button>
-                <button onclick="app.setView('list')" id="view-list" class="p-2 rounded-md text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
-            </div>
-
-            <!-- Sort Select -->
-            <div class="relative">
-                <select id="sort-select" onchange="app.handleSort()" class="appearance-none bg-slate-900/50 border border-slate-800 text-slate-300 text-sm rounded-xl pl-4 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer hover:bg-slate-800/50 transition-colors font-medium">
-                <option value="rarity_desc">Rarity (Highest)</option>
-                <option value="rarity_asc">Rarity (Lowest)</option>
-                <option value="depth_deep">Depth (Deepest)</option>
-                <option value="depth_shallow">Depth (Shallowest)</option>
-                <option value="name_asc">Name (A-Z)</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                </div>
-            </div>
-
-        </div>
-    </header>
-
-    <!-- Content Area -->
-    <div id="content-area" class="flex-1 overflow-y-auto px-6 py-8 custom-scrollbar scroll-smooth">
-      
-        <!-- Tab Switcher -->
-      <div class="flex justify-start mb-8">
-        <div class="bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800 inline-flex shadow-inner">
-          <button onclick="app.switchView('ores')" id="tab-ores" class="clickable px-8 py-2.5 rounded-xl text-sm font-bold transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 ring-1 ring-white/10">
-            MINING LOG
-          </button>
-          <button onclick="app.switchView('crafts')" id="tab-crafts" class="clickable px-8 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
-            CRAFTING
-          </button>
-        </div>
-      </div>
-
-      <!-- Results Grid -->
-      <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20">
-          <!-- Items injected here -->
-      </div>
-      
-      <!-- Empty State -->
-      <div id="empty-state" class="hidden h-full flex flex-col items-center justify-center text-center opacity-60 mt-12 pb-20">
-        <div class="w-24 h-24 bg-slate-900/50 rounded-full flex items-center justify-center mb-6 ring-1 ring-slate-800">
-            <svg class="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </div>
-        <h3 class="text-2xl font-bold text-slate-200 mb-2">No items found</h3>
-        <p class="text-slate-500 max-w-xs mx-auto">We couldn't find anything matching your search. Try changing criteria.</p>
-        <button onclick="app.resetFilters()" class="clickable mt-8 px-6 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm font-semibold text-slate-200 transition-colors border border-slate-700">
-            Clear Filters
-        </button>
-      </div>
-
+    <div class="tabs">
+        <button class="tab-btn active" onclick="setTab('all', this)">Global Rank</button>
+        <button class="tab-btn" onclick="setTab('rarity', this)">Most of a Rarity</button>
+        <button class="tab-btn" onclick="setTab('block', this)">Most of a Single Block</button>
     </div>
-  
-  <!-- Improved Depth Map (Was Simulator) -->
-  <div id="depth-simulator" class="fixed inset-y-0 right-0 w-[420px] bg-[#0b0c15] border-l border-slate-800 shadow-2xl transform translate-x-full transition-transform duration-500 ease-in-out z-50 flex flex-col">
-    <!-- Header -->
-    <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-gradient-to-r from-slate-900 to-slate-900/50">
-      <div>
-        <h2 class="text-xl font-bold text-white flex items-center gap-2">
-          <span class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-          </span>
-          Geological Map
-        </h2>
-        <p class="text-xs text-slate-500 mt-1 pl-10">Select a layer to filter results</p>
-      </div>
-      <button onclick="app.toggleDepthSimulator()" class="p-2 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-white transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-      </button>
+    <div id="rarity-controls">
+        <label class="small-muted" for="rarity-select">Show blocks for:</label>
+        <select id="rarity-select" class="rarity-select" onchange="onRarityChange(this.value)">
+            <option value="Ethereal">Ethereal</option>
+            <option value="Celestial">Celestial</option>
+            <option value="Zenith">Zenith</option>
+            <option value="Divine">Divine</option>
+            <option value="Nil">Nil</option>
+            <option value="All">All Rarities</option>
+        </select>
     </div>
+    <input type="text" id="search" placeholder="search explorer name..." oninput="render()">
+    <div id="leaderboard"></div>
+    <div id="status">loading data...</div>
+</div>
+<script>
+let rawData = {"users":{}};
+let processed = [];
+let currentTab = 'all';
+const rarityOrder = ["Ethereal","Celestial","Zenith","Divine","Nil"];
+let rarityIndex = 0;
+let rarityInterval = null;
+let selectedRarity = 'Ethereal';
+const rarityColors = {
+    Ethereal: "var(--ethereal)",
+    Celestial: "var(--celestial)",
+    Zenith: "var(--zenith)",
+    Divine: "var(--divine)",
+    Nil: "var(--nil)",
+    Mythic: "var(--mythic)",
+    Legendary: "var(--legendary)"
+};
 
-    <!-- Content -->
-    <div class="flex-1 overflow-y-auto overflow-x-hidden p-0" id="depth-content">
-      <!-- Injected depth layers -->
-    </div>
-    
-  </div>
-
-  <div id="depth-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300" onclick="app.toggleDepthSimulator()"></div>
-
-  <!-- Item Details Modal -->
-  <div id="modal-backdrop" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0" onclick="if(event.target === this) app.closeModal()">
-    <div id="modal-panel" class="bg-[#0f111a] border border-slate-700/50 w-full max-w-2xl rounded-2xl shadow-2xl transform scale-95 transition-all duration-300 overflow-hidden relative ring-1 ring-white/10">
-      
-      <!-- Top Stripe -->
-      <div id="modal-header-stripe" class="h-1.5 w-full bg-slate-700 shadow-[0_0_20px_rgba(255,255,255,0.3)]"></div>
-      
-      <div class="p-8">
-        <!-- Header -->
-        <div class="flex justify-between items-start mb-8">
-          <div>
-            <div id="modal-rarity-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-800 text-slate-300 mb-3 border border-slate-700 shadow-sm">
-                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                <span>RARITY</span>
-            </div>
-            <h2 id="modal-title" class="text-3xl md:text-4xl font-extrabold text-white leading-tight tracking-tight">Ore Name</h2>
-          </div>
-          <button onclick="app.closeModal()" class="clickable text-slate-500 hover:text-white transition-colors bg-slate-800/50 hover:bg-slate-800 p-2.5 rounded-xl">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
-        </div>
-
-        <!-- content -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-4">
-            <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800/60 hover:border-indigo-500/30 transition-colors group">
-              <span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2 mb-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
-                Location Layer
-              </span>
-              <p id="modal-layer" class="text-xl text-slate-200 group-hover:text-white font-semibold">Layer Name</p>
-            </div>
-            <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800/60 hover:border-emerald-500/30 transition-colors group">
-              <span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2 mb-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                Depth Range
-              </span>
-              <p id="modal-depth" class="text-xl text-emerald-400 font-mono mt-1">0 - 100</p>
-            </div>
-          </div>
-          
-          <!-- Actions -->
-          <div class="space-y-3 pt-2">
-             <button onclick="app.copyToClipboard()" class="clickable w-full py-4 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 text-slate-200 font-semibold transition-all flex items-center justify-center gap-3 group">
-              <svg class="w-5 h-5 text-slate-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-              Copy Details
-            </button>
-            <button onclick="app.toggleFavoriteFromModal()" id="modal-fav-btn" class="clickable w-full py-4 rounded-xl bg-slate-800/50 hover:bg-amber-900/20 border border-slate-700/50 hover:border-amber-500/30 text-slate-200 font-semibold transition-all flex items-center justify-center gap-3 group">
-              <svg id="modal-star-icon" class="w-5 h-5 text-slate-500 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-              <span id="modal-fav-text">Add to Favorites</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <div class="bg-slate-950/80 px-8 py-4 border-t border-slate-800 flex justify-between items-center">
-         <span class="text-[10px] text-slate-600 font-mono tracking-wider">ID: <span id="modal-hash" class="text-slate-500">...</span></span>
-         <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase">Miners World</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-8 right-8 transform translate-y-20 opacity-0 transition-all duration-300 z-[70] bg-white text-slate-900 px-6 py-4 rounded-xl shadow-2xl font-bold flex items-center gap-4 ring-4 ring-slate-900/20">
-    <!-- Same toast -->
-    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-    </div>
-    <span id="toast-msg">Notification</span>
-  </div>
-  
-  <div id="craft-modal-backdrop" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0" onclick="if(event.target === this) app.closeCraftModal()">
-      <!-- Reuse exact same craft modal structure -->
-      <div id="craft-modal-panel" class="bg-[#0f111a] border border-slate-700/50 w-full max-w-2xl rounded-2xl shadow-2xl transform scale-95 transition-all duration-300 overflow-hidden relative max-h-[90vh] ring-1 ring-white/10">
-      <div id="craft-modal-header-stripe" class="h-1.5 w-full bg-slate-700 shadow-[0_0_20px_rgba(255,255,255,0.2)]"></div>
-
-      <div class="p-8 overflow-y-auto max-h-[calc(90vh-8px)] custom-scrollbar">
-        <div class="flex justify-between items-start mb-6">
-          <div>
-            <div id="craft-modal-rarity-badge" class="inline-block px-3 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 mb-2 border border-slate-700 tracking-widest uppercase">RARITY</div>
-            <h2 id="craft-modal-title" class="text-3xl font-extrabold text-white leading-tight tracking-tight">Craft Name</h2>
-          </div>
-          <button onclick="app.closeCraftModal()" class="clickable text-slate-500 hover:text-white transition-colors bg-slate-800/50 hover:bg-slate-800 p-2.5 rounded-xl">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
-        </div>
-
-        <div class="mb-8 p-4 bg-slate-900/50 rounded-xl border border-slate-800/50">
-          <p id="craft-modal-description" class="text-slate-300 text-base leading-relaxed">Description</p>
-        </div>
-
-        <div id="craft-modal-requirements" class="space-y-3">
-          <!-- Requirements rendered here -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <script src="data.js?v=3"></script>
-  <script src="crafts.js?v=3"></script>
-
-  <script>
-    // --- 1. CONFIG & DATA ---
-    const RarityConfig = {
-      'Default': { color: '#64748b', rank: 0 },
-      'Common': { color: '#cbd5e1', rank: 1 },
-      'Uncommon': { color: '#4ade80', rank: 2 },
-      'Rare': { color: '#3b82f6', rank: 3 },
-      'Epic': { color: '#a855f7', rank: 4 },
-      'Legendary': { color: '#fbbf24', rank: 5 },
-      'Mythic': { color: '#ef4444', rank: 6 },
-      'Ethereal': { color: '#ec4899', rank: 7 },
-      'Celestial': { color: '#06b6d4', rank: 8 },
-      'Zenith': { color: '#d946ef', rank: 9 }, 
-      'Divine': { color: '#111111', rank: 11 }, // Updated to Black/Dark
-      'Nil': { color: '#ffffff', rank: 12 },
-      'Miscellaneous Blocks': { color: '#a16207', rank: 0.5 },
-    };
-
-    class App {
-      constructor() {
-        this.data = [];
-        this.activeLayer = null;
-        this.activeRarities = new Set();
-        this.searchQuery = "";
-        this.sortBy = "rarity_desc";
-        this.viewMode = "grid"; 
-        this.favorites = new Set(JSON.parse(localStorage.getItem('mw_favorites') || '[]'));
-        this.favoritesMode = false;
-        
-        // Crafts specific
-        this.currentView = 'ores';
-        this.craftsActiveRarities = new Set();
-        this.craftsSortBy = 'rarity_desc';
-
-        this.init();
-      }
-
-      async init() {
-        this.visibleCount = 50;
-
-        if (typeof RAW_ORES !== 'undefined') {
-            this.data = RAW_ORES.map((o, idx) => ({
-                ...o,
-                id: o.id !== undefined ? o.id : idx,
-                parsedDepth: this.parseDepth(o.depth),
-                rarityRank: RarityConfig[o.rarity]?.rank || 0
-            }));
-            
-            this.buildSidebar();
-            this.initIntersectionObserver();
-            this.render();
-            // Initial UI state setup for View Toggle
-            this.setView('grid');
-        } else {
-            console.error("RAW_ORES not found.");
-            this.showToast("Error loading data");
-        }
-      }
-
-      initIntersectionObserver() {
-          this.infiniteObserver = new IntersectionObserver((entries) => {
-              if (entries[0].isIntersecting) {
-                  this.visibleCount += 50;
-                  this.render(true);
-              }
-          }, { rootMargin: '600px' });
-
-          this.virtualObserver = new IntersectionObserver((entries) => {
-              entries.forEach(entry => {
-                  const target = entry.target;
-                  if (!entry.isIntersecting) {
-                      if (target.offsetHeight > 0) {
-                          target.style.height = target.offsetHeight + 'px';
-                          target.innerHTML = '';
-                          target.dataset.loaded = 'false';
-                      }
-                  } else {
-                      if (target.dataset.loaded === 'false') {
-                         const start = parseInt(target.dataset.start);
-                         const end = parseInt(target.dataset.end);
-                         
-                         if (this.currentFilteredData) {
-                             const slice = this.currentFilteredData.slice(start, end);
-                             const html = slice.map(item => this.viewMode === 'grid' ? this.cardTemplate(item) : this.rowTemplate(item)).join('');
-                             target.innerHTML = html;
-                             target.style.height = 'auto'; // Release height constraint
-                             target.dataset.loaded = 'true';
-                         }
-                      }
-                  }
-              });
-          }, { rootMargin: '800px 0px 800px 0px' }); 
-      }
-
-      parseDepth(depthStr) {
-        if (!depthStr) return 0;
-        let s = depthStr.replace(/,/g, '').toLowerCase();
-        if (s.includes('and below')) return -10000;
-        const matches = s.match(/-?\d+/g);
-        if (!matches) return 0;
-        const nums = matches.map(Number);
-        return nums.length === 1 ? nums[0] : (nums[0] + nums[1]) / 2;
-      }
-
-      setView(mode) {
-        this.viewMode = mode;
-        const btnGrid = document.getElementById('view-grid');
-        const btnList = document.getElementById('view-list');
-        
-        if(mode === 'grid') {
-            btnGrid.classList.add('bg-slate-800', 'text-white', 'shadow-sm', 'ring-1', 'ring-white/5');
-            btnGrid.classList.remove('text-slate-500', 'hover:bg-slate-800/50');
-            
-            btnList.classList.remove('bg-slate-800', 'text-white', 'shadow-sm', 'ring-1', 'ring-white/5');
-            btnList.classList.add('text-slate-500', 'hover:bg-slate-800/50');
-        } else {
-            btnList.classList.add('bg-slate-800', 'text-white', 'shadow-sm', 'ring-1', 'ring-white/5');
-            btnList.classList.remove('text-slate-500', 'hover:bg-slate-800/50');
-            
-            btnGrid.classList.remove('bg-slate-800', 'text-white', 'shadow-sm', 'ring-1', 'ring-white/5');
-            btnGrid.classList.add('text-slate-500', 'hover:bg-slate-800/50');
-        }
-        
-        this.render();
-      }
-
-      switchView(viewName) {
-          const tabOres = document.getElementById('tab-ores');
-          const tabCrafts = document.getElementById('tab-crafts');
-          const searchInput = document.getElementById('search-input');
-
-          this.currentView = viewName;
-          
-          if(viewName === 'ores') {
-             tabOres.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
-             tabOres.classList.remove('text-slate-400', 'hover:bg-slate-800/50');
-             
-             tabCrafts.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
-             tabCrafts.classList.add('text-slate-400', 'hover:bg-slate-800/50');
-             
-             searchInput.placeholder = 'Search ores, depths...';
-          } else {
-             tabCrafts.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
-             tabCrafts.classList.remove('text-slate-400', 'hover:bg-slate-800/50');
-             
-             tabOres.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
-             tabOres.classList.add('text-slate-400', 'hover:bg-slate-800/50');
-             
-             searchInput.placeholder = 'Search crafts...';
-          }
-          this.render();
-      }
-
-      toggleMobileMenu() {
-        const sb = document.getElementById('sidebar');
-        const overlay = document.getElementById('mobile-overlay');
-        const isOpen = !sb.classList.contains('-translate-x-full');
-        
-        if (isOpen) {
-          sb.classList.add('-translate-x-full');
-          overlay.classList.add('hidden');
-        } else {
-          sb.classList.remove('-translate-x-full');
-          overlay.classList.remove('hidden');
-        }
-      }
-
-      toggleFavoritesMode() {
-        this.favoritesMode = !this.favoritesMode;
-        const btn = document.getElementById('btn-favs');
-        const icon = btn.querySelector('div:first-child');
-        
-        if(this.favoritesMode) {
-          btn.classList.add('bg-amber-500/10', 'border-amber-500/30');
-          icon.classList.add('bg-amber-500', 'text-black');
-          icon.classList.remove('bg-amber-500/10', 'text-amber-500');
-        } else {
-          btn.classList.remove('bg-amber-500/10', 'border-amber-500/30');
-          icon.classList.remove('bg-amber-500', 'text-black');
-          icon.classList.add('bg-amber-500/10', 'text-amber-500');
-        }
-        this.render();
-      }
-
-      // --- FILTER LOGIC ---
-      buildSidebar() {
-        const layers = [...new Set(this.data.map(d => d.layer))].filter(Boolean);
-        const layerContainer = document.getElementById('layer-list');
-        
-        const mkLayerBtn = (name) => {
-          const btn = document.createElement('button');
-          btn.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors truncate';
-          btn.innerText = name || "All Layers";
-          
-          btn.onclick = () => {
-             Array.from(layerContainer.children).forEach(c => {
-               c.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors truncate';
-             });
-             this.activeLayer = name;
-             btn.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 truncate';
-             this.render();
-          };
-          return btn;
-        };
-
-        layerContainer.appendChild(mkLayerBtn(null)); 
-        layers.forEach(l => layerContainer.appendChild(mkLayerBtn(l)));
-
-        // Activate "All" by default
-        if(layerContainer.firstElementChild) {
-           layerContainer.firstElementChild.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 truncate';
-        }
-
-        // Rarities
-        const rarities = Object.keys(RarityConfig);
-        const rarContainer = document.getElementById('rarity-list');
-        rarities.forEach(r => {
-          const btn = document.createElement('button');
-          btn.className = 'px-2.5 py-1 rounded-md border border-slate-800 bg-slate-900/30 text-[10px] uppercase font-bold text-slate-500 hover:border-slate-600 hover:text-slate-300 transition-all';
-          btn.innerText = r;
-          
-          btn.onclick = () => {
-             // Handle set selection
-             const activeSet = this.currentView === 'crafts' ? this.craftsActiveRarities : this.activeRarities;
-             if(activeSet.has(r)) {
-                 activeSet.delete(r);
-                 btn.className = 'px-2.5 py-1 rounded-md border border-slate-800 bg-slate-900/30 text-[10px] uppercase font-bold text-slate-500 hover:border-slate-600 hover:text-slate-300 transition-all';
-                 btn.style.color = '';
-                 btn.style.borderColor = '';
-                 btn.style.backgroundColor = '';
-             } else {
-                 activeSet.add(r);
-                 const c = RarityConfig[r].color;
-                 btn.className = 'px-2.5 py-1 rounded-md border text-[10px] uppercase font-bold transition-all shadow-lg';
-                 btn.classList.add('ring-1', 'ring-white/10');
-                 btn.style.color = c;
-                 btn.style.borderColor = c;
-                 btn.style.backgroundColor = c + '15'; // 10% opacity
-             }
-             this.render();
-          };
-          rarContainer.appendChild(btn);
+async function loadData() {
+    const resp = await fetch('block_data.json');
+    rawData = await resp.json();
+    processed = Object.entries(rawData.users||{}).map(([name,user])=>{
+        const grouped={};
+        Object.entries(user.rarities||{}).forEach(([r,c])=>{
+            const m=r.match(/^(ethereal|celestial|zenith|divine|mythic|nil|legendary)/i);
+            const baseRaw=m?m[0]:r.split(' ')[0];
+            const base=baseRaw.charAt(0).toUpperCase()+baseRaw.slice(1).toLowerCase();
+            grouped[base]=(grouped[base]||0)+c;
         });
+        const sortedGroupedRarities = Object.entries(grouped).sort((a,b)=>b[1]-a[1]);
+        const bestRarity = sortedGroupedRarities[0]||["None",0];
+        const sortedBlocks = Object.entries(user.blocks||{}).sort((a,b)=>b[1]-a[1]);
+        const bestBlock = sortedBlocks[0]||["None",0];
+        return {name,data:user,groupedRarities:grouped,sortedGroupedRarities,sortedBlocks,bestRarity,bestBlock,globalTotal:user.total||0};
+    });
+    document.getElementById('status').innerText='data live';
+}
 
-        this.updateStats();
-      }
+function setTab(mode, btn){
+    currentTab = mode;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('rarity-controls').style.display = (mode==='rarity')?'block':'none';
+    render();
+}
 
-      updateStats() {
-        const counts = {};
-        this.data.forEach(d => counts[d.rarity] = (counts[d.rarity] || 0) + 1);
-        const max = Math.max(...Object.values(counts));
-        const container = document.getElementById('stats-container');
-        container.innerHTML = '';
+function onRarityChange(val){
+    selectedRarity = val;
+    render();
+}
 
-        Object.keys(RarityConfig).forEach(r => {
-          if(!counts[r]) return;
-          const pct = (counts[r] / max) * 100;
-          const row = document.createElement('div');
-          row.className = "flex items-center gap-3 text-[10px] group cursor-default";
-          row.innerHTML = `
-            <div class="w-16 text-right text-slate-500 truncate group-hover:text-slate-300 transition-colors">${r}</div>
-            <div class="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background-color: ${RarityConfig[r].color}"></div>
-            </div>
-            <div class="w-6 text-slate-500 font-mono">${counts[r]}</div>
-          `;
-          container.appendChild(row);
-        });
-        document.getElementById('total-count').innerText = this.data.length + ' Items';
-        
-        const badge = document.getElementById('fav-count-badge');
-        badge.innerText = this.favorites.size;
-        badge.classList.toggle('opacity-0', this.favorites.size === 0);
-      }
-
-      handleSort() {
-        const val = document.getElementById('sort-select').value;
-        if(this.currentView === 'crafts') this.craftsSortBy = val;
-        else this.sortBy = val;
-        this.render();
-      }
-
-      resetFilters() {
-        this.activeLayer = null;
-        this.activeRarities.clear();
-        this.craftsActiveRarities.clear();
-        this.searchQuery = "";
-        this.favoritesMode = false;
-        document.getElementById('search-input').value = "";
-          
-        this.toggleFavoritesMode(); // Only if it was on? no, this toggles.
-        if(this.favoritesMode) this.toggleFavoritesMode(); // Turn off if on
-
-        // Reset visual buttons
-        const layerButtons = document.getElementById('layer-list').children;
-        Array.from(layerButtons).forEach(c => {
-             c.className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors truncate';
-        });
-        if(layerButtons.length > 0) layerButtons[0].className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 truncate';
-
-        const rarButtons = document.getElementById('rarity-list').children;
-        Array.from(rarButtons).forEach(b => {
-             b.className = 'px-2.5 py-1 rounded-md border border-slate-800 bg-slate-900/30 text-[10px] uppercase font-bold text-slate-500 hover:border-slate-600 hover:text-slate-300 transition-all';
-             b.style = "";
-        });
-
-        this.render();
-      }
-
-      getProcessedData() {
-        let res = this.data;
-        // Search
-        const q = this.searchQuery.toLowerCase();
-        if(q) {
-          res = res.filter(o => 
-            o.name.toLowerCase().includes(q) || 
-            o.layer.toLowerCase().includes(q) || 
-            (o.rarity && o.rarity.toLowerCase().includes(q))
-          );
-        }
-        // Filters
-        if(this.activeLayer) res = res.filter(o => o.layer === this.activeLayer);
-        if(this.activeRarities.size > 0) res = res.filter(o => this.activeRarities.has(o.rarity));
-        if(this.favoritesMode) res = res.filter(o => this.favorites.has(o.id));
-
-        // Sort
-        res.sort((a, b) => {
-          switch(this.sortBy) {
-            case 'name_asc': return a.name.localeCompare(b.name);
-            case 'rarity_asc': return a.rarityRank - b.rarityRank;
-            case 'rarity_desc': return b.rarityRank - a.rarityRank;
-            case 'depth_deep': return a.parsedDepth - b.parsedDepth;
-            case 'depth_shallow': return b.parsedDepth - a.parsedDepth;
-            default: return 0;
-          }
-        });
-        return res;
-      }
-
-      render(isAppend = false) {
-          if (this.currentView === 'crafts') {
-              this.renderCrafts();
-              return;
-          }
-
-        if (!isAppend) {
-            this.visibleCount = 50;
-            this.currentFilteredData = this.getProcessedData(); 
-        } else {
-             if (!this.currentFilteredData) this.currentFilteredData = this.getProcessedData();
-        }
-
-        const filtered = this.currentFilteredData;
-        const grid = document.getElementById('results-grid');
-        const empty = document.getElementById('empty-state');
-
-        if(filtered.length === 0) {
-          grid.innerHTML = '';
-          empty.classList.remove('hidden');
-          return;
-        }
-        empty.classList.add('hidden');
-        
-        grid.className = this.viewMode === 'grid' 
-          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20"
-          : "flex flex-col gap-3 pb-20";
-
-        if (!isAppend) {
-             grid.innerHTML = '';
-             this.appendPageBlock(grid, filtered, 0, 50, 0);
-        } else {
-             const s = document.getElementById('scroll-sentinel');
-             if (s) s.remove();
-             
-             const start = this.visibleCount - 50; 
-             const end = Math.min(this.visibleCount, filtered.length);
-             const pageIndex = Math.floor(start / 50);
-             
-             this.appendPageBlock(grid, filtered, start, end, pageIndex);
-        }
-        
-        this.updateStats();
-
-        if (this.visibleCount < filtered.length) {
-            const sentinel = document.createElement('div');
-            sentinel.id = 'scroll-sentinel';
-            sentinel.className = 'col-span-full h-10 w-full opacity-0 pointer-events-none';
-            grid.appendChild(sentinel);
-            if(this.infiniteObserver) this.infiniteObserver.observe(sentinel);
-        }
-      }
-
-      appendPageBlock(grid, data, start, end, pageIndex) {
-          const pageDiv = document.createElement('div');
-          pageDiv.className = this.viewMode === 'grid' 
-            ? "contents" // In Grid mode, use contents so children participate in parent grid directly
-            : "flex flex-col gap-3 w-full"; // In List mode, regular wrapper
-          
-          if(this.viewMode === 'grid') {
-             // Virtualization hack for 'contents': 
-             // We can't really virtualize 'contents' easily because it has no dimensions.
-             // We will skip virtualization for Grid mode for now to keep layout perfect, 
-             // or render direct children.
-             // Reverting to direct append for grid mode to ensure layout stability 
-             const slice = data.slice(start, end);
-             const html = slice.map(item => this.cardTemplate(item)).join('');
-             // We just append to grid innerHTML? No, we need to respect the append.
-             // If we use 'contents', we can't easily unload it as a block without wrapping it.
-             // But wrapping it breaks the grid unless subgrid.
-             
-             // COMPROMISE: Render simple HTML strings for now.
-             pageDiv.innerHTML = html;
-          } else {
-              // List mode virtualization works fine
-             pageDiv.dataset.pageId = pageIndex;
-             pageDiv.dataset.start = start;
-             pageDiv.dataset.end = end;
-             pageDiv.dataset.loaded = 'true';
-             const slice = data.slice(start, end);
-             pageDiv.innerHTML = slice.map(item => this.rowTemplate(item)).join('');
-             if(this.virtualObserver) this.virtualObserver.observe(pageDiv);
-          }
-           
-          grid.appendChild(pageDiv);
-      }
-
-      cardTemplate(o) {
-        const color = RarityConfig[o.rarity]?.color || '#fff';
-        const isFav = this.favorites.has(o.id);
-        const divineClass = o.rarity === 'Divine' ? 'text-divine' : '';
-        
-        return `
-          <div onclick="app.openModal(${o.id})" 
-               class="group relative bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 cursor-pointer card-glow overflow-hidden animate-slide-up"
-               style="--glow-color: ${color}">
-            
-            <div class="flex justify-between items-start mb-3 relative z-10">
-              <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-slate-700/50 bg-slate-950/30 ${divineClass}" style="color:${color}; border-color:${color}40">${o.rarity}</span>
-              ${isFav ? `<div class="bg-amber-500/10 p-1 rounded-full"><svg class="w-3.5 h-3.5 text-amber-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></div>` : ''}
-            </div>
-
-            <h3 class="font-bold text-slate-200 text-lg leading-tight mb-4 group-hover:text-white transition-colors line-clamp-2 min-h-[3rem] ${divineClass}">${o.name}</h3>
-
-            <div class="space-y-2 relative z-10 border-t border-slate-800/50 pt-3">
-              <div class="flex justify-between text-xs items-center">
-                <span class="text-slate-500 font-medium">Layer</span>
-                <span class="text-slate-400 truncate max-w-[60%] text-right bg-slate-800/50 px-2 py-0.5 rounded">${o.layer}</span>
-              </div>
-              <div class="flex justify-between text-xs items-center">
-                <span class="text-slate-500 font-medium">Depth</span>
-                <span class="text-emerald-400 font-mono tracking-tight">${o.depth}</span>
-              </div>
-            </div>
-            
-             <!-- Bottom color bar glow -->
-             <div class="absolute bottom-0 left-0 right-0 h-1 opacity-50 group-hover:opacity-100 transition-opacity" style="background: ${color}; box-shadow: 0 -5px 15px ${color}40"></div>
-          </div>
-        `;
-      }
-
-      rowTemplate(o) {
-        const color = RarityConfig[o.rarity]?.color || '#fff';
-        const isFav = this.favorites.has(o.id);
-        const safeName = o.name.replace(/'/g, "&#39;");
-        const divineClass = o.rarity === 'Divine' ? 'text-divine' : '';
-        
-        return `
-          <div onclick="app.openModal(${o.id})" class="flex items-center gap-5 p-4 bg-slate-900/40 border border-slate-800/50 rounded-xl hover:bg-slate-800/60 cursor-pointer group transition-all animate-slide-up hover:border-slate-700">
-            <div class="w-1.5 h-10 rounded-full shadow-[0_0_10px_currentColor]" style="background-color: ${color}; color: ${color}"></div>
-            <div class="flex-1 min-w-0">
-              <h4 class="font-bold text-slate-200 group-hover:text-white text-base ${divineClass}">${safeName}</h4>
-              <div class="text-xs text-slate-500 truncate mt-0.5">${o.layer}</div>
-            </div>
-            <div class="hidden md:block text-xs font-mono text-emerald-500 px-3 py-1 bg-emerald-500/10 rounded border border-emerald-500/20">${o.depth}</div>
-            <div class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-slate-950 border border-slate-800 whitespace-nowrap min-w-[80px] text-center ${divineClass}" style="color:${color}">${o.rarity}</div>
-            ${isFav ? `<svg class="w-4 h-4 text-amber-500 fill-current shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>` : '<div class="w-4"></div>'}
-          </div>
-        `;
-      }
-
-      // --- RENDER CRAFTS ---
-      renderCrafts() {
-          const grid = document.getElementById('results-grid');
-          if (!grid || typeof CRAFTS === 'undefined') return;
-
-          grid.className = this.viewMode === 'grid' 
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20"
-            : "flex flex-col gap-3 pb-20";
-        
-          const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
-          
-          // Basic filtering
-          let filtered = (typeof CRAFTS !== 'undefined') ? CRAFTS : [];
-          if(searchTerm) filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm));
-          if(this.craftsActiveRarities.size > 0) filtered = filtered.filter(c => this.craftsActiveRarities.has(c.rarity));
-
-          // Sort
-          filtered.sort((a,b) => {
-             const rA = RarityConfig[a.rarity]?.rank || 0;
-             const rB = RarityConfig[b.rarity]?.rank || 0;
-             return this.craftsSortBy === 'rarity_desc' ? rB - rA : rA - rB;
-          });
-
-          if(filtered.length === 0) {
-              grid.innerHTML = document.getElementById('empty-state').outerHTML.replace('hidden', '');
-              return;
-          }
-
-          grid.innerHTML = filtered.map(craft => {
-               const config = RarityConfig[craft.rarity] || { color: '#64748b' };
-               const craftJson = JSON.stringify(craft).replace(/"/g, '&quot;');
-               
-               return `
-               <div onclick="app.openCraftModal(${craftJson})" class="group relative bg-[#11131f] border border-slate-800/60 rounded-2xl overflow-hidden cursor-pointer hover:border-slate-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl animate-fade-in" style="--glow-color: ${config.color}">
-                 <div class="h-1 w-full" style="background: ${config.color}; box-shadow: 0 2px 10px ${config.color}50"></div>
-                 <div class="p-6">
-                    <div class="flex items-start justify-between mb-4"> 
-                        <h3 class="text-lg font-bold text-white leading-tight group-hover:text-indigo-300 transition-colors">${craft.name}</h3>
-                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-slate-900 border border-slate-800" style="color: ${config.color}">${craft.rarity}</span>
-                    </div>
-                    ${craft.requirements ? `
-                    <div class="bg-slate-950/50 rounded-xl p-3 border border-slate-800/50 space-y-2">
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest block mb-2">Needs</span>
-                        ${craft.requirements.slice(0, 3).map(r => `
-                             <div class="flex justify-between text-xs text-slate-400">
-                                <span>${r.block}</span>
-                                <span class="font-mono text-slate-300">${r.amount}</span>
-                             </div>
-                        `).join('')}
-                        ${craft.requirements.length > 3 ? `<div class="text-[10px] text-center text-slate-600 italic">+${craft.requirements.length - 3} more</div>` : ''}
-                    </div>` : ''}
-                 </div>
-               </div>
-               `;
-          }).join('');
-          
-          document.getElementById('total-count').innerText = filtered.length + ' Crafts';
-      }
-
-      openModal(id) {
-        const item = this.data.find(i => i.id === id);
-        if(!item) return;
-        this.currentModalItem = item;
-        const color = RarityConfig[item.rarity]?.color;
-        
-        document.getElementById('modal-title').innerText = item.name;
-        document.getElementById('modal-layer').innerText = item.layer;
-        document.getElementById('modal-depth').innerText = item.depth;
-        document.getElementById('modal-hash').innerText = btoa(item.name + item.id).substring(0, 16);
-        
-        const badge = document.getElementById('modal-rarity-badge');
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-current"></span> ${item.rarity}`;
-        badge.style.color = color;
-        badge.style.borderColor = color;
-        badge.style.backgroundColor = color + '15';
-        
-        document.getElementById('modal-header-stripe').style.backgroundColor = color;
-        document.getElementById('modal-header-stripe').style.boxShadow = `0 0 25px ${color}`;
-
-        // Ensure title contrast if Divine
-        if(item.rarity === 'Divine') {
-            document.getElementById('modal-title').classList.add('text-divine');
-        } else {
-             document.getElementById('modal-title').classList.remove('text-divine');
-        }
-
-        this.updateModalFavBtn();
-
-        const backdrop = document.getElementById('modal-backdrop');
-        const panel = document.getElementById('modal-panel');
-        
-        backdrop.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          backdrop.classList.remove('opacity-0');
-          panel.classList.remove('scale-95');
-          panel.classList.add('scale-100');
-        });
-      }
-
-      closeModal() {
-        const backdrop = document.getElementById('modal-backdrop');
-        const panel = document.getElementById('modal-panel');
-        backdrop.classList.add('opacity-0');
-        panel.classList.remove('scale-100');
-        panel.classList.add('scale-95');
-        setTimeout(() => {
-          backdrop.classList.add('hidden');
-          this.currentModalItem = null;
-        }, 300);
-      }
-
-      toggleFavoriteFromModal() {
-        if(!this.currentModalItem) return;
-        const id = this.currentModalItem.id;
-        
-        if(this.favorites.has(id)) {
-          this.favorites.delete(id);
-          this.showToast(`Removed from favorites`);
-        } else {
-          this.favorites.add(id);
-          this.showToast(`Saved to favorites`);
-        }
-        localStorage.setItem('mw_favorites', JSON.stringify([...this.favorites]));
-        this.updateModalFavBtn();
-        this.updateStats();
-        this.render(); 
-      }
-
-      updateModalFavBtn() {
-        const isFav = this.favorites.has(this.currentModalItem.id);
-        const btn = document.getElementById('modal-fav-btn');
-        const icon = document.getElementById('modal-star-icon');
-        const txt = document.getElementById('modal-fav-text');
-
-        if(isFav) {
-          icon.classList.add('text-amber-400', 'fill-current');
-          txt.innerText = "Remove Favorite";
-          btn.classList.add('border-amber-500/30', 'bg-amber-500/10');
-        } else {
-          icon.classList.remove('text-amber-400', 'fill-current');
-          txt.innerText = "Add to Favorites";
-          btn.classList.remove('border-amber-500/30', 'bg-amber-500/10');
-        }
-      }
-      
-      openCraftModal(craft) {
-        document.getElementById('craft-modal-title').innerText = craft.name;
-        document.getElementById('craft-modal-description').innerText = craft.description || 'No description available.';
-        
-        const color = RarityConfig[craft.rarity]?.color || '#fff';
-        const badge = document.getElementById('craft-modal-rarity-badge');
-        badge.innerText = craft.rarity;
-        badge.style.color = color;
-        badge.style.borderColor = color;
-        badge.style.backgroundColor = color + '15';
-        document.getElementById('craft-modal-header-stripe').style.backgroundColor = color;
-        document.getElementById('craft-modal-header-stripe').style.boxShadow = `0 0 25px ${color}`;
-
-        const reqContainer = document.getElementById('craft-modal-requirements');
-        if (craft.requirements && craft.requirements.length > 0) {
-           reqContainer.innerHTML = `<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Required Materials</h3>` + 
-           craft.requirements.map(req => `
-                <div class="flex items-center justify-between bg-slate-900/50 p-4 rounded-xl border border-slate-800/50">
-                    <span class="text-slate-200 font-medium">${req.block}</span>
-                    <span class="font-mono font-bold text-indigo-400">${req.amount.toLocaleString()}</span>
-                </div>
-           `).join('');
-        } else {
-            reqContainer.innerHTML = `<div class="p-4 text-center text-slate-500 italic border border-dashed border-slate-800 rounded-xl">No requirements</div>`;
-        }
-
-        const backdrop = document.getElementById('craft-modal-backdrop');
-        const panel = document.getElementById('craft-modal-panel');
-        backdrop.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          backdrop.classList.remove('opacity-0');
-          panel.classList.remove('scale-95');
-          panel.classList.add('scale-100');
-        });
-      }
-      
-      closeCraftModal() {
-        const backdrop = document.getElementById('craft-modal-backdrop');
-        const panel = document.getElementById('craft-modal-panel');
-        backdrop.classList.add('opacity-0');
-        panel.classList.remove('scale-100');
-        panel.classList.add('scale-95');
-        setTimeout(() => backdrop.classList.add('hidden'), 300);
-      }
-
-      copyToClipboard() {
-        if(!this.currentModalItem) return;
-        const i = this.currentModalItem;
-        const text = `Ore: ${i.name}\nRarity: ${i.rarity}\nLayer: ${i.layer}\nDepth: ${i.depth}`;
-        navigator.clipboard.writeText(text).then(() => {
-          this.showToast('Details copied');
-        });
-      }
-
-      showToast(msg) {
-        const t = document.getElementById('toast');
-        document.getElementById('toast-msg').innerText = msg;
-        t.classList.remove('opacity-0', 'translate-y-20');
-        if(this.toastTimer) clearTimeout(this.toastTimer);
-        this.toastTimer = setTimeout(() => {
-          t.classList.add('opacity-0', 'translate-y-20');
-        }, 3000);
-      }
-      
-      toggleDepthSimulator() {
-        const panel = document.getElementById('depth-simulator');
-        const overlay = document.getElementById('depth-overlay');
-        const isOpen = !panel.classList.contains('translate-x-full');
-
-        if (isOpen) {
-          panel.classList.add('translate-x-full');
-          overlay.classList.add('hidden');
-          overlay.classList.remove('opacity-100');
-        } else {
-          panel.classList.remove('translate-x-full');
-          overlay.classList.remove('hidden');
-          setTimeout(() => overlay.classList.add('opacity-100'), 10);
-          this.renderDepthSimulator();
-        }
-      }
-
-      renderDepthSimulator() {
-        const container = document.getElementById('depth-content');
-        const layers = {};
-        this.data.forEach(ore => {
-          if (!layers[ore.layer]) {
-            layers[ore.layer] = { depth: ore.parsedDepth, depthStr: ore.depth, ores: [] };
-          }
-          layers[ore.layer].ores.push(ore);
-        });
-        const sortedLayers = Object.entries(layers).sort((a, b) => b[1].depth - a[1].depth);
-        const maxDepth = Math.max(...this.data.map(o => o.parsedDepth));
-        const minDepth = Math.min(...this.data.map(o => o.parsedDepth));
-        const range = maxDepth - minDepth;
-
-        // Simplified, Cleaner list format (User didn't like the meter/complex view)
-        // We'll rename it "Geological Map" and make it just a nice list of layers.
-        
-        let html = '<div class="relative pl-0">';
-        
-        sortedLayers.forEach(([layerName, layerData], index) => {
-           // We'll create a subtle gradient per item to show depth progression
-           const depthRatio = (layerData.depth - minDepth) / range; // 0 to 1
-           const opacity = 0.05 + (depthRatio * 0.1); // slightly increasing opacity
-           
-           html += `
-             <div class="depth-layer p-5 border-b border-slate-800/50 cursor-pointer group hover:bg-slate-800/20 transition-all relative overflow-hidden" 
-                  onclick="app.activeLayer='${layerName}'; app.toggleDepthSimulator(); app.render(); app.showToast('Filtered by Layer')">
-               
-               <div class="absolute inset-0 bg-indigo-500 pointer-events-none" style="opacity: ${opacity}"></div>
-               <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500/0 group-hover:bg-indigo-500 transition-colors"></div>
-
-               <div class="flex justify-between items-center mb-1 relative z-10">
-                 <h4 class="font-bold text-slate-200 group-hover:text-white transition-colors text-base">${layerName}</h4>
-                 <span class="text-[10px] font-mono text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">${layerData.depthStr}</span>
-               </div>
-               
-               <div class="flex flex-wrap gap-1.5 mt-2 relative z-10">
-                 ${layerData.ores.slice(0, 12).map(o => {
-                    const c = RarityConfig[o.rarity]?.color;
-                    return `<div class="w-2 h-2 rounded-sm opacity-60 hover:opacity-100" style="background:${c}" title="${o.name}"></div>`
-                 }).join('')}
-                 ${layerData.ores.length > 12 ? `<span class="text-[9px] text-slate-500 ml-1">+${layerData.ores.length-12}</span>` : ''}
-               </div>
-             </div>
-           `;
-        });
-        
-        html += '</div>';
-        container.innerHTML = html;
-      }
+function render(){
+    const query = document.getElementById('search').value.toLowerCase();
+    const container = document.getElementById('leaderboard');
+    container.innerHTML = '';
+    if(!processed || !processed.length) return;
+    let sorted = [...processed];
+    if(currentTab==='all') sorted.sort((a,b)=>b.globalTotal-a.globalTotal);
+    else if(currentTab==='rarity'){
+        if(selectedRarity==='All') sorted.sort((a,b)=> (b.bestRarity[1]||0)-(a.bestRarity[1]||0));
+        else sorted.sort((a,b)=>(b.groupedRarities[selectedRarity]||0)-(a.groupedRarities[selectedRarity]||0));
     }
+    else if(currentTab==='block') sorted.sort((a,b)=>b.bestBlock[1]-a.bestBlock[1]);
 
-    // --- 3. START APP ---
-    const app = new App();
+    document.getElementById('stat-total').innerText=processed.reduce((a,b)=>a+b.globalTotal,0).toLocaleString();
+    const topUser=[...processed].sort((a,b)=>b.globalTotal-a.globalTotal)[0];
+    document.getElementById('stat-top').innerText = topUser?`@${topUser.name}`:'-';
+    const totalEth=processed.reduce((a,b)=>a+(b.groupedRarities['Ethereal']||0),0);
+    document.getElementById('stat-rarity-count').innerText=totalEth.toLocaleString();
 
-    let debounce;
-    document.getElementById('search-input').addEventListener('input', (e) => {
-      clearTimeout(debounce);
-      debounce = setTimeout(() => {
-        app.searchQuery = e.target.value;
-        app.render();
-      }, 250);
+    sorted.forEach((item,index)=>{
+        if(query && !item.name.toLowerCase().includes(query)) return;
+        const card = document.createElement('div');
+        const realRank = index + 1;
+        const rankColor = realRank===1?'var(--gold)':realRank===2?'var(--silver)':realRank===3?'var(--bronze)':'var(--dim)';
+        const rankClass = realRank===1?"rank-gold":realRank===2?"rank-silver":realRank===3?"rank-bronze":"rank-other";
+        card.className=`user-card ${rankClass}`;
+
+        let subText = `x${item.globalTotal.toLocaleString()}`;
+        if(currentTab==='rarity'){
+            const count = selectedRarity==='All' ? item.bestRarity[1]||0 : item.groupedRarities[selectedRarity]||0;
+            subText = `x${count.toLocaleString()} ${selectedRarity}`;
+        } else if(currentTab==='block'){
+            subText = `x${item.bestBlock[1].toLocaleString()} ${item.bestBlock[0]}`;
+        }
+
+        const blocksHtml = item.sortedBlocks.map(([b,c])=>`<div class="stat-item"><div class="stat-row"><span>${b}</span><span style="color:var(--dim)">x${c.toLocaleString()}</span></div></div>`).join('');
+        const raritiesHtml = item.sortedGroupedRarities.map(([r,count])=>`<div class="stat-item"><div class="stat-row"><span class="val-${r.toLowerCase()}">${r}</span><span class="val-${r.toLowerCase()}">x${count.toLocaleString()}</span></div></div>`).join('');
+
+        card.innerHTML = `
+        <div class="user-header" onclick="toggle(this)">
+            <span class="username">${realRank}. @${item.name}</span>
+            <span class="total-count" style="color:${rankColor}">${subText}</span>
+        </div>
+        <div class="details">
+            <div class="grid">
+                <div>
+                    <h3>block log</h3>
+                    ${blocksHtml}
+                </div>
+                <div>
+                    <h3>rarities</h3>
+                    ${raritiesHtml}
+                </div>
+            </div>
+        </div>
+        `;
+        container.appendChild(card);
     });
+}
 
-    document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape') {
-        app.closeModal();
-        app.closeCraftModal();
-      }
-    });
+function updateRarityStat(){
+    if(!processed || !processed.length) return;
+    const currentRarity = rarityOrder[rarityIndex];
+    const total = processed.reduce((sum,user)=>sum+(user.groupedRarities[currentRarity]||0),0);
+    const nameEl=document.getElementById('stat-rarity-name');
+    const countEl=document.getElementById('stat-rarity-count');
+    if(nameEl) nameEl.innerText = `${currentRarity}s found`;
+    if(countEl) { countEl.innerText=total.toLocaleString(); countEl.style.color = rarityColors[currentRarity]||"var(--dim)"; }
+    rarityIndex = (rarityIndex+1)%rarityOrder.length;
+}
 
-  </script>
+function startRarityRotation(){
+    if(rarityInterval) clearInterval(rarityInterval);
+    updateRarityStat();
+    rarityInterval = setInterval(updateRarityStat,4000);
+}
+
+function toggle(el){
+    const d = el.nextElementSibling;
+    d.style.display = d.style.display==='block'?'none':'block';
+}
+
+window.onload = async()=>{
+    await loadData();
+    render();
+    startRarityRotation();
+};
+</script>
 </body>
 </html>
