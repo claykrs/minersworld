@@ -234,6 +234,5 @@ document.querySelectorAll('.tab').forEach(t => {
 
 window.onload = () => {
   loadData();
-  setInterval(loadData, 30000);
+  setInterval(loadData, 10000);
 };
-
