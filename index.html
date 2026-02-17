@@ -1,161 +1,55 @@
-const rarityNames = {
-  11: "Nil",
-  10: "Divine",
-  9: "Zenith",
-  8: "Celestial",
-  0: "Ethereal",
-  6: "Mythic",
-  5: "Legendary"
-}
-
-let storeData = {}, players = {}, globalData = {}, blockIdToName = {}, globalBlockCounts = {}
-let globalRankList = [], rarityRankList = [], globalBlocksList = []
-let pageSize = 100, globalPage = 0, rarityPage = 0, blockPage = 0
-let currentRarity = null
-
-async function loadData() {
-  storeData = await fetch('https://ore-scraper-production.up.railway.app/api/data').then(r => r.json())
-  blockIdToName = await fetch('./data/blockid.json').then(r => r.json())
-
-  players = storeData.players || {}
-  globalData = storeData.global || { total: 0, blocks: {}, rarities: {} }
-
-  computeGlobalBlocks()
-  computeGlobalRank()
-  computeRarityRank()
-  renderGlobalRank()
-  renderRarityRank()
-  renderGlobalBlocks()
-  renderStats()
-}
-
-function computeGlobalBlocks() {
-  globalBlocksList = Object.entries(globalData.blocks || {})
-    .map(([bid, count]) => ({
-      bid,
-      count,
-      rarity: globalData.rarities?.[bid] ?? 0
-    }))
-    .sort((a, b) => b.count - a.count)
-}
-
-function computeGlobalRank() {
-  globalRankList = Object.entries(players)
-    .map(([username, data]) => ({ username, count: data.total || 0 }))
-    .sort((a, b) => b.count - a.count)
-
-  let rank = 1, lastCount = null
-  globalRankList.forEach((p, i) => {
-    if (lastCount !== null && p.count < lastCount) rank = i + 1
-    lastCount = p.count
-    p.rank = rank
-  })
-}
-
-function computeRarityRank() {
-  rarityRankList = Object.entries(players)
-    .map(([username, data]) => {
-      let count = 0
-      for (const [rarity, val] of Object.entries(data.rarities || {})) {
-        if (!currentRarity || parseInt(rarity) === currentRarity) count += val
-      }
-      return { username, count }
-    })
-    .sort((a, b) => b.count - a.count)
-
-  let rank = 1, lastCount = null
-  rarityRankList.forEach((p, i) => {
-    if (lastCount !== null && p.count < lastCount) rank = i + 1
-    lastCount = p.count
-    p.rank = rank
-  })
-}
-
-function renderGlobalRank() {
-  const tbody = document.getElementById('globalRankBody')
-  tbody.innerHTML = ''
-  const start = globalPage * pageSize, end = start + pageSize
-  for (const p of globalRankList.slice(start, end)) {
-    const tr = document.createElement('tr')
-    tr.className = 'player-row rank' + (p.rank <= 3 ? p.rank : '')
-    tr.innerHTML = `<td>${p.rank}</td><td>${p.username}</td><td>${p.count}</td>`
-    tbody.appendChild(tr)
-  }
-}
-
-function renderRarityRank() {
-  const tbody = document.getElementById('rarityRankBody')
-  tbody.innerHTML = ''
-  const start = rarityPage * pageSize, end = start + pageSize
-  for (const p of rarityRankList.slice(start, end)) {
-    const tr = document.createElement('tr')
-    tr.className = 'player-row rank' + (p.rank <= 3 ? p.rank : '')
-    tr.innerHTML = `<td>${p.rank}</td><td>${p.username}</td><td>${p.count}</td>`
-    tbody.appendChild(tr)
-  }
-}
-
-function renderGlobalBlocks() {
-  const tbody = document.getElementById('globalBlocksBody')
-  tbody.innerHTML = ''
-  const start = blockPage * pageSize, end = start + pageSize
-
-  for (const b of globalBlocksList.slice(start, end)) {
-    const tr = document.createElement('tr')
-    tr.className = 'block-row'
-    const name = blockIdToName[b.bid] || b.bid
-    const rarityName = rarityNames[b.rarity] || b.rarity
-    tr.innerHTML = `<td></td><td>${name}</td><td>${rarityName}</td><td>${b.count}</td>`
-    tbody.appendChild(tr)
-  }
-
-  tbody.querySelectorAll('tr').forEach((tr, i) => tr.children[0].textContent = start + i + 1)
-}
-
-function renderStats() {
-  const container = document.getElementById('statsContent')
-  const totalPlayers = Object.keys(players).length
-  const totalBlocks = globalData.total || 0
-  container.innerHTML = `<p>Total Players: ${totalPlayers}</p><p>Total Blocks Mined: ${totalBlocks}</p>`
-}
-
-document.getElementById('raritySelect').innerHTML =
-  `<option value="">All</option>` +
-  Object.entries(rarityNames).map(([r, name]) => `<option value="${r}">${name}</option>`).join('')
-
-document.getElementById('raritySelect').addEventListener('change', e => {
-  currentRarity = e.target.value ? parseInt(e.target.value) : null
-  rarityPage = 0
-  computeRarityRank()
-  renderRarityRank()
-})
-
-document.getElementById('prevGlobal').addEventListener('click', () => {
-  if (globalPage > 0) { globalPage--; renderGlobalRank() }
-})
-document.getElementById('nextGlobal').addEventListener('click', () => {
-  if ((globalPage + 1) * pageSize < globalRankList.length) { globalPage++; renderGlobalRank() }
-})
-document.getElementById('prevRarity').addEventListener('click', () => {
-  if (rarityPage > 0) { rarityPage--; renderRarityRank() }
-})
-document.getElementById('nextRarity').addEventListener('click', () => {
-  if ((rarityPage + 1) * pageSize < rarityRankList.length) { rarityPage++; renderRarityRank() }
-})
-document.getElementById('prevBlocks').addEventListener('click', () => {
-  if (blockPage > 0) { blockPage--; renderGlobalBlocks() }
-})
-document.getElementById('nextBlocks').addEventListener('click', () => {
-  if ((blockPage + 1) * pageSize < globalBlocksList.length) { blockPage++; renderGlobalBlocks() }
-})
-
-document.querySelectorAll('#tabs .tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
-    tab.classList.add('active')
-    document.querySelectorAll('.tabContent').forEach(tc => tc.classList.remove('active'))
-    document.getElementById(tab.dataset.tab).classList.add('active')
-  })
-})
-
-window.addEventListener('load', loadData)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ore Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="container">
+  <div id="tabs">
+    <button class="tab active" data-tab="globalRank">Global Rank</button>
+    <button class="tab" data-tab="rarityRank">Most of Each Rarity</button>
+    <button class="tab" data-tab="globalBlocks">Global Blocks</button>
+  </div>
+  <div id="content">
+    <div id="globalRank" class="tabContent active">
+      <table>
+        <thead><tr><th>#</th><th>Player</th><th>Total Blocks</th></tr></thead>
+        <tbody id="globalRankBody"></tbody>
+      </table>
+      <div class="pagination">
+        <button id="prevGlobal">Prev</button>
+        <button id="nextGlobal">Next</button>
+      </div>
+    </div>
+    <div id="rarityRank" class="tabContent">
+      <select id="raritySelect"></select>
+      <table>
+        <thead><tr><th>#</th><th>Player</th><th>Blocks</th></tr></thead>
+        <tbody id="rarityRankBody"></tbody>
+      </table>
+      <div class="pagination">
+        <button id="prevRarity">Prev</button>
+        <button id="nextRarity">Next</button>
+      </div>
+    </div>
+    <div id="globalBlocks" class="tabContent">
+      <table>
+        <thead><tr><th>#</th><th>Block</th><th>Rarity</th><th>Total Mined</th></tr></thead>
+        <tbody id="globalBlocksBody"></tbody>
+      </table>
+      <div class="pagination">
+        <button id="prevBlocks">Prev</button>
+        <button id="nextBlocks">Next</button>
+      </div>
+    </div>
+  </div>
+  <div id="statsPanel">
+    <h2>Global Stats</h2>
+    <div id="statsContent"></div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
