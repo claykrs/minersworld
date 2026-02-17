@@ -1,0 +1,67 @@
+body {
+    font-family: sans-serif;
+    background: #111;
+    color: #eee;
+    margin: 0;
+    padding: 0;
+  }
+  #container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 10px;
+  }
+  #tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    background: #222;
+    border: none;
+    cursor: pointer;
+    color: #eee;
+  }
+  .tab.active {
+    background: #444;
+  }
+  .tabContent {
+    display: none;
+  }
+  .tabContent.active {
+    display: block;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 5px;
+  }
+  th, td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+  }
+  .player-row:nth-child(odd), .block-row:nth-child(odd) {
+    background: #161616;
+  }
+  .player-row:nth-child(even), .block-row:nth-child(even) {
+    background: #1b1b1b;
+  }
+  .player-row.rank1 { background: #ff69b4; color: #000; }
+  .player-row.rank2 { background: #87cefa; color: #000; }
+  .player-row.rank3 { background: #800080; color: #fff; }
+  .zenith { color: #ff0; font-weight: bold; margin-left: 5px; }
+  .pagination {
+    margin: 5px 0 15px 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+  }
+  #statsPanel {
+    margin-top: 20px;
+    padding: 10px;
+    background: #222;
+    border-radius: 6px;
+  }
+  
