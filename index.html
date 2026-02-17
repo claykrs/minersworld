@@ -1,61 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Ore Dashboard</title>
-<link rel="stylesheet" href="style.css?v=2.0">
+    <meta charset="UTF-8">
+    <title>Ore Dashboard</title>
+    <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
 <div id="container">
-  <div id="tabs">
-    <button class="tab active" data-tab="globalRank">Global Rank</button>
-    <button class="tab" data-tab="rarityRank">By Rarity Rank</button>
-    <button class="tab" data-tab="globalBlocks">Global Blocks</button>
-    <button class="tab" data-tab="playerSearch">Players</button>
-  </div>
-  <div id="content">
-    <div id="globalRank" class="tabContent active">
-      <table>
-        <thead><tr><th>#</th><th>Player</th><th>Total Blocks</th></tr></thead>
-        <tbody id="globalRankBody"></tbody>
-      </table>
-      <div class="pagination">
-        <button id="prevGlobal">Prev</button>
-        <button id="nextGlobal">Next</button>
-      </div>
+    <div id="tabs">
+        <button class="tab active" data-tab="globalRank">Global Rank</button>
+        <button class="tab" data-tab="rarityRank">By Rarity Rank</button>
+        <button class="tab" data-tab="dailyLeaderboard">Leaderboard</button>
+        <button class="tab" data-tab="globalBlocks">Global Blocks</button>
+        <button class="tab" data-tab="playerSearch">Players</button>
     </div>
-    <div id="rarityRank" class="tabContent">
-      <select id="raritySelect"></select>
-      <table>
-        <thead><tr><th>#</th><th>Player</th><th>Blocks</th></tr></thead>
-        <tbody id="rarityRankBody"></tbody>
-      </table>
-      <div class="pagination">
-        <button id="prevRarity">Prev</button>
-        <button id="nextRarity">Next</button>
-      </div>
+    <div id="content">
+        <div id="globalRank" class="tabContent active">
+            <table>
+                <thead><tr><th>#</th><th>Player</th><th>Total Blocks</th></tr></thead>
+                <tbody id="globalRankBody"></tbody>
+            </table>
+            <div class="pagination">
+                <button id="prevGlobal">Prev</button>
+                <button id="nextGlobal">Next</button>
+            </div>
+        </div>
+
+        <div id="rarityRank" class="tabContent">
+            <select id="raritySelect"></select>
+            <table>
+                <thead><tr><th>#</th><th>Player</th><th>Blocks</th></tr></thead>
+                <tbody id="rarityRankBody"></tbody>
+            </table>
+            <div class="pagination">
+                <button id="prevRarity">Prev</button>
+                <button id="nextRarity">Next</button>
+            </div>
+        </div>
+
+        <div id="dailyLeaderboard" class="tabContent">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <select id="dailyRaritySelect" style="margin-bottom:0;"></select>
+                <select id="timeFrameSelect" style="margin-bottom:0;">
+                    <option value="1">Today</option>
+                    <option value="7">Past Week (Best Day)</option>
+                    <option value="0">All Time (Best Day)</option>
+                </select>
+            </div>
+            <table>
+                <thead><tr><th>#</th><th>Player</th><th id="dailyScoreHeader">Blocks Mined</th></tr></thead>
+                <tbody id="dailyLeaderboardBody"></tbody>
+            </table>
+            <div class="pagination">
+                <button id="prevDaily">Prev</button>
+                <button id="nextDaily">Next</button>
+            </div>
+        </div>
+
+        <div id="globalBlocks" class="tabContent">
+            <input type="text" id="blockSearchInput" placeholder="Search blocks..." 
+            style="width: 100%; padding: 10px; margin-bottom: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box;">
+            <table>
+                <thead><tr><th>#</th><th>Block</th><th>Rarity</th><th>Total Mined</th></tr></thead>
+                <tbody id="globalBlocksBody"></tbody>
+            </table>
+            <div class="pagination">
+                <button id="prevBlocks">Prev</button>
+                <button id="nextBlocks">Next</button>
+            </div>
+        </div>
+
+        <div id="playerSearch" class="tabContent">
+            <input type="text" id="playerSearchInput" placeholder="Search username..."
+            style="width: 100%; padding: 10px; margin-bottom: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box;">
+            <div id="playerSearchResult"></div>
+        </div>
     </div>
-    <div id="globalBlocks" class="tabContent">
-      <table>
-        <thead><tr><th>#</th><th>Block</th><th>Rarity</th><th>Total Mined</th></tr></thead>
-        <tbody id="globalBlocksBody"></tbody>
-      </table>
-      <div class="pagination">
-        <button id="prevBlocks">Prev</button>
-        <button id="nextBlocks">Next</button>
-      </div>
+    <div id="statsPanel">
+        <h2>Global Stats</h2>
+        <div id="statsContent"></div>
     </div>
-    <div id="playerSearch" class="tabContent">
-      <input type="text" id="playerSearchInput" placeholder="Search username..."
-      style="width: 100%; padding: 10px; margin-bottom: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box;">
-      <div id="playerSearchResult"></div>
-    </div>
-  </div>
-  <div id="statsPanel">
-    <h2>Global Stats</h2>
-    <div id="statsContent"></div>
-  </div>
 </div>
-<script src="script.js?v=2.0"></script>
+<script src="script.js?v=3.0"></script>
 </body>
 </html>
