@@ -1,337 +1,161 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>block discovery dashboard</title>
-<style>
-:root {
-    --bg: #0b0b0b;
-    --card: #161616;
-    --text: #eee;
-    --dim: #888;
-    --ethereal: #ff69b4;
-    --celestial: #87cefa;
-    --zenith: #9d00ff;
-    --divine: #ffffff;
-    --nil: #555555;
-    --mythic: #ff4444;
-    --legendary: #f1f500;
-    --gold: #ffd700;
-    --silver: #c0c0c0;
-    --bronze: #cd7f32;
-    --default-rank: #2a2a2a;
+const rarityNames = {
+  11: "Nil",
+  10: "Divine",
+  9: "Zenith",
+  8: "Celestial",
+  0: "Ethereal",
+  6: "Mythic",
+  5: "Legendary"
 }
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    padding: 20px;
-    line-height: 1.5;
-    margin: 0;
-}
-.container {
-    max-width: 900px;
-    margin: 0 auto;
-}
-.tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 10px;
-}
-.tab-btn {
-    background: none;
-    border: none;
-    color: var(--dim);
-    cursor: pointer;
-    padding: 8px 16px;
-    font-weight: 700;
-    font-size: .9em;
-    text-transform: uppercase;
-    border-radius: 4px;
-}
-.tab-btn.active {
-    color: var(--ethereal);
-    background: rgba(255,105,180,.08);
-}
-.header-stats {
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    gap: 15px;
-    margin-bottom: 14px;
-}
-.stat-card {
-    background: var(--card);
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #222;
-    text-align: center;
-    min-height: 64px;
-}
-.stat-card h4 {
-    margin: 0;
-    font-size: .7em;
-    text-transform: uppercase;
-    color: var(--dim);
-}
-.stat-card p {
-    margin: 5px 0 0;
-    font-size: 1.4em;
-    font-weight: 600;
-}
-#rarity-controls {
-    display: none;
-    margin: 12px 0 18px;
-}
-.rarity-select {
-    background: var(--card);
-    border: 1px solid #333;
-    color: var(--text);
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-weight: 600;
-}
-input[type="text"] {
-    width: 100%;
-    padding: 12px;
-    background: var(--card);
-    border: 1px solid #333;
-    color: white;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    box-sizing: border-box;
-    outline: none;
-}
-.user-card {
-    background: var(--card);
-    border: 1px solid #222;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    overflow: hidden;
-}
-.rank-gold {
-    border-left: 5px solid var(--gold);
-}
-.rank-silver {
-    border-left: 5px solid var(--silver);
-}
-.rank-bronze {
-    border-left: 5px solid var(--bronze);
-}
-.rank-other {
-    border-left: 5px solid var(--default-rank);
-}
-.user-header {
-    padding: 14px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-}
-.user-header:hover {
-    background: #222;
-}
-.username {
-    font-weight: 600;
-    font-size: 1.05em;
-    color: #fff;
-}
-.total-count {
-    font-family: monospace;
-    font-size: 1.05em;
-    font-weight: 600;
-}
-.val-ethereal { color: var(--ethereal); text-shadow:0 0 8px rgba(255,105,180,.5); font-weight:700; }
-.val-celestial { color: var(--celestial); text-shadow:0 0 8px rgba(135,206,250,.5); font-weight:700; }
-.val-zenith { color: var(--zenith); text-shadow:0 0 8px rgba(157,0,255,.5); font-weight:700; }
-.val-divine { color: var(--divine); text-shadow:0 0 8px rgba(255,255,255,.5); font-weight:700; }
-.val-nil { color: var(--nil); font-weight:700; }
-.val-mythic { color: var(--mythic); text-shadow:0 0 8px rgba(255,68,68,.5); font-weight:700; }
-.val-legendary { color: var(--legendary); text-shadow:0 0 8px rgba(241,245,0,.5); font-weight:700; }
-.details { display: none; padding: 18px; background: #0f0f0f; border-top: 1px solid #222; }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.stat-item { padding: 6px 0; border-bottom:1px solid #1a1a1a; font-size: .9em; }
-.stat-row { display:flex; justify-content: space-between; align-items: center; }
-h3 { font-size: .75em; text-transform: uppercase; color: var(--dim); border-bottom:1px solid #333; padding-bottom:6px; margin-bottom:8px; }
-#status { text-align:center; color:var(--dim); font-size:.8em; margin-top:8px; }
-.small-muted { color: var(--dim); font-size:.9em; }
-</style>
-</head>
-<body>
-<div class="container">
-    <div class="header-stats">
-        <div class="stat-card">
-            <h4>total discoveries</h4>
-            <p id="stat-total">0</p>
-        </div>
-        <div class="stat-card">
-            <h4>top explorer</h4>
-            <p id="stat-top" style="color:var(--gold)">-</p>
-        </div>
-        <div class="stat-card" id="stat-rarity-card">
-            <h4 id="stat-rarity-name">ethereals found</h4>
-            <p id="stat-rarity-count" style="color:var(--ethereal)">0</p>
-        </div>
-    </div>
-    <div class="tabs">
-        <button class="tab-btn active" onclick="setTab('all', this)">Global Rank</button>
-        <button class="tab-btn" onclick="setTab('rarity', this)">Most of a Rarity</button>
-        <button class="tab-btn" onclick="setTab('block', this)">Most of a Single Block</button>
-    </div>
-    <div id="rarity-controls">
-        <label class="small-muted" for="rarity-select">Show blocks for:</label>
-        <select id="rarity-select" class="rarity-select" onchange="onRarityChange(this.value)">
-            <option value="Ethereal">Ethereal</option>
-            <option value="Celestial">Celestial</option>
-            <option value="Zenith">Zenith</option>
-            <option value="Divine">Divine</option>
-            <option value="Nil">Nil</option>
-            <option value="All">All Rarities</option>
-        </select>
-    </div>
-    <input type="text" id="search" placeholder="search explorer name..." oninput="render()">
-    <div id="leaderboard"></div>
-    <div id="status">loading data...</div>
-</div>
-<script>
-let rawData = {"users":{}};
-let processed = [];
-let currentTab = 'all';
-const rarityOrder = ["Ethereal","Celestial","Zenith","Divine","Nil"];
-let rarityIndex = 0;
-let rarityInterval = null;
-let selectedRarity = 'Ethereal';
-const rarityColors = {
-    Ethereal: "var(--ethereal)",
-    Celestial: "var(--celestial)",
-    Zenith: "var(--zenith)",
-    Divine: "var(--divine)",
-    Nil: "var(--nil)",
-    Mythic: "var(--mythic)",
-    Legendary: "var(--legendary)"
-};
+
+let storeData = {}, players = {}, globalData = {}, blockIdToName = {}, globalBlockCounts = {}
+let globalRankList = [], rarityRankList = [], globalBlocksList = []
+let pageSize = 100, globalPage = 0, rarityPage = 0, blockPage = 0
+let currentRarity = null
 
 async function loadData() {
-    const resp = await fetch('block_data.json');
-    rawData = await resp.json();
-    processed = Object.entries(rawData.users||{}).map(([name,user])=>{
-        const grouped={};
-        Object.entries(user.rarities||{}).forEach(([r,c])=>{
-            const m=r.match(/^(ethereal|celestial|zenith|divine|mythic|nil|legendary)/i);
-            const baseRaw=m?m[0]:r.split(' ')[0];
-            const base=baseRaw.charAt(0).toUpperCase()+baseRaw.slice(1).toLowerCase();
-            grouped[base]=(grouped[base]||0)+c;
-        });
-        const sortedGroupedRarities = Object.entries(grouped).sort((a,b)=>b[1]-a[1]);
-        const bestRarity = sortedGroupedRarities[0]||["None",0];
-        const sortedBlocks = Object.entries(user.blocks||{}).sort((a,b)=>b[1]-a[1]);
-        const bestBlock = sortedBlocks[0]||["None",0];
-        return {name,data:user,groupedRarities:grouped,sortedGroupedRarities,sortedBlocks,bestRarity,bestBlock,globalTotal:user.total||0};
-    });
-    document.getElementById('status').innerText='data live';
+  storeData = await fetch('https://ore-scraper-production.up.railway.app/api/data').then(r => r.json())
+  blockIdToName = await fetch('./data/blockid.json').then(r => r.json())
+
+  players = storeData.players || {}
+  globalData = storeData.global || { total: 0, blocks: {}, rarities: {} }
+
+  computeGlobalBlocks()
+  computeGlobalRank()
+  computeRarityRank()
+  renderGlobalRank()
+  renderRarityRank()
+  renderGlobalBlocks()
+  renderStats()
 }
 
-function setTab(mode, btn){
-    currentTab = mode;
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('rarity-controls').style.display = (mode==='rarity')?'block':'none';
-    render();
+function computeGlobalBlocks() {
+  globalBlocksList = Object.entries(globalData.blocks || {})
+    .map(([bid, count]) => ({
+      bid,
+      count,
+      rarity: globalData.rarities?.[bid] ?? 0
+    }))
+    .sort((a, b) => b.count - a.count)
 }
 
-function onRarityChange(val){
-    selectedRarity = val;
-    render();
+function computeGlobalRank() {
+  globalRankList = Object.entries(players)
+    .map(([username, data]) => ({ username, count: data.total || 0 }))
+    .sort((a, b) => b.count - a.count)
+
+  let rank = 1, lastCount = null
+  globalRankList.forEach((p, i) => {
+    if (lastCount !== null && p.count < lastCount) rank = i + 1
+    lastCount = p.count
+    p.rank = rank
+  })
 }
 
-function render(){
-    const query = document.getElementById('search').value.toLowerCase();
-    const container = document.getElementById('leaderboard');
-    container.innerHTML = '';
-    if(!processed || !processed.length) return;
-    let sorted = [...processed];
-    if(currentTab==='all') sorted.sort((a,b)=>b.globalTotal-a.globalTotal);
-    else if(currentTab==='rarity'){
-        if(selectedRarity==='All') sorted.sort((a,b)=> (b.bestRarity[1]||0)-(a.bestRarity[1]||0));
-        else sorted.sort((a,b)=>(b.groupedRarities[selectedRarity]||0)-(a.groupedRarities[selectedRarity]||0));
-    }
-    else if(currentTab==='block') sorted.sort((a,b)=>b.bestBlock[1]-a.bestBlock[1]);
+function computeRarityRank() {
+  rarityRankList = Object.entries(players)
+    .map(([username, data]) => {
+      let count = 0
+      for (const [rarity, val] of Object.entries(data.rarities || {})) {
+        if (!currentRarity || parseInt(rarity) === currentRarity) count += val
+      }
+      return { username, count }
+    })
+    .sort((a, b) => b.count - a.count)
 
-    document.getElementById('stat-total').innerText=processed.reduce((a,b)=>a+b.globalTotal,0).toLocaleString();
-    const topUser=[...processed].sort((a,b)=>b.globalTotal-a.globalTotal)[0];
-    document.getElementById('stat-top').innerText = topUser?`@${topUser.name}`:'-';
-    const totalEth=processed.reduce((a,b)=>a+(b.groupedRarities['Ethereal']||0),0);
-    document.getElementById('stat-rarity-count').innerText=totalEth.toLocaleString();
-
-    sorted.forEach((item,index)=>{
-        if(query && !item.name.toLowerCase().includes(query)) return;
-        const card = document.createElement('div');
-        const realRank = index + 1;
-        const rankColor = realRank===1?'var(--gold)':realRank===2?'var(--silver)':realRank===3?'var(--bronze)':'var(--dim)';
-        const rankClass = realRank===1?"rank-gold":realRank===2?"rank-silver":realRank===3?"rank-bronze":"rank-other";
-        card.className=`user-card ${rankClass}`;
-
-        let subText = `x${item.globalTotal.toLocaleString()}`;
-        if(currentTab==='rarity'){
-            const count = selectedRarity==='All' ? item.bestRarity[1]||0 : item.groupedRarities[selectedRarity]||0;
-            subText = `x${count.toLocaleString()} ${selectedRarity}`;
-        } else if(currentTab==='block'){
-            subText = `x${item.bestBlock[1].toLocaleString()} ${item.bestBlock[0]}`;
-        }
-
-        const blocksHtml = item.sortedBlocks.map(([b,c])=>`<div class="stat-item"><div class="stat-row"><span>${b}</span><span style="color:var(--dim)">x${c.toLocaleString()}</span></div></div>`).join('');
-        const raritiesHtml = item.sortedGroupedRarities.map(([r,count])=>`<div class="stat-item"><div class="stat-row"><span class="val-${r.toLowerCase()}">${r}</span><span class="val-${r.toLowerCase()}">x${count.toLocaleString()}</span></div></div>`).join('');
-
-        card.innerHTML = `
-        <div class="user-header" onclick="toggle(this)">
-            <span class="username">${realRank}. @${item.name}</span>
-            <span class="total-count" style="color:${rankColor}">${subText}</span>
-        </div>
-        <div class="details">
-            <div class="grid">
-                <div>
-                    <h3>block log</h3>
-                    ${blocksHtml}
-                </div>
-                <div>
-                    <h3>rarities</h3>
-                    ${raritiesHtml}
-                </div>
-            </div>
-        </div>
-        `;
-        container.appendChild(card);
-    });
+  let rank = 1, lastCount = null
+  rarityRankList.forEach((p, i) => {
+    if (lastCount !== null && p.count < lastCount) rank = i + 1
+    lastCount = p.count
+    p.rank = rank
+  })
 }
 
-function updateRarityStat(){
-    if(!processed || !processed.length) return;
-    const currentRarity = rarityOrder[rarityIndex];
-    const total = processed.reduce((sum,user)=>sum+(user.groupedRarities[currentRarity]||0),0);
-    const nameEl=document.getElementById('stat-rarity-name');
-    const countEl=document.getElementById('stat-rarity-count');
-    if(nameEl) nameEl.innerText = `${currentRarity}s found`;
-    if(countEl) { countEl.innerText=total.toLocaleString(); countEl.style.color = rarityColors[currentRarity]||"var(--dim)"; }
-    rarityIndex = (rarityIndex+1)%rarityOrder.length;
+function renderGlobalRank() {
+  const tbody = document.getElementById('globalRankBody')
+  tbody.innerHTML = ''
+  const start = globalPage * pageSize, end = start + pageSize
+  for (const p of globalRankList.slice(start, end)) {
+    const tr = document.createElement('tr')
+    tr.className = 'player-row rank' + (p.rank <= 3 ? p.rank : '')
+    tr.innerHTML = `<td>${p.rank}</td><td>${p.username}</td><td>${p.count}</td>`
+    tbody.appendChild(tr)
+  }
 }
 
-function startRarityRotation(){
-    if(rarityInterval) clearInterval(rarityInterval);
-    updateRarityStat();
-    rarityInterval = setInterval(updateRarityStat,4000);
+function renderRarityRank() {
+  const tbody = document.getElementById('rarityRankBody')
+  tbody.innerHTML = ''
+  const start = rarityPage * pageSize, end = start + pageSize
+  for (const p of rarityRankList.slice(start, end)) {
+    const tr = document.createElement('tr')
+    tr.className = 'player-row rank' + (p.rank <= 3 ? p.rank : '')
+    tr.innerHTML = `<td>${p.rank}</td><td>${p.username}</td><td>${p.count}</td>`
+    tbody.appendChild(tr)
+  }
 }
 
-function toggle(el){
-    const d = el.nextElementSibling;
-    d.style.display = d.style.display==='block'?'none':'block';
+function renderGlobalBlocks() {
+  const tbody = document.getElementById('globalBlocksBody')
+  tbody.innerHTML = ''
+  const start = blockPage * pageSize, end = start + pageSize
+
+  for (const b of globalBlocksList.slice(start, end)) {
+    const tr = document.createElement('tr')
+    tr.className = 'block-row'
+    const name = blockIdToName[b.bid] || b.bid
+    const rarityName = rarityNames[b.rarity] || b.rarity
+    tr.innerHTML = `<td></td><td>${name}</td><td>${rarityName}</td><td>${b.count}</td>`
+    tbody.appendChild(tr)
+  }
+
+  tbody.querySelectorAll('tr').forEach((tr, i) => tr.children[0].textContent = start + i + 1)
 }
 
-window.onload = async()=>{
-    await loadData();
-    render();
-    startRarityRotation();
-};
-</script>
-</body>
-</html>
+function renderStats() {
+  const container = document.getElementById('statsContent')
+  const totalPlayers = Object.keys(players).length
+  const totalBlocks = globalData.total || 0
+  container.innerHTML = `<p>Total Players: ${totalPlayers}</p><p>Total Blocks Mined: ${totalBlocks}</p>`
+}
+
+document.getElementById('raritySelect').innerHTML =
+  `<option value="">All</option>` +
+  Object.entries(rarityNames).map(([r, name]) => `<option value="${r}">${name}</option>`).join('')
+
+document.getElementById('raritySelect').addEventListener('change', e => {
+  currentRarity = e.target.value ? parseInt(e.target.value) : null
+  rarityPage = 0
+  computeRarityRank()
+  renderRarityRank()
+})
+
+document.getElementById('prevGlobal').addEventListener('click', () => {
+  if (globalPage > 0) { globalPage--; renderGlobalRank() }
+})
+document.getElementById('nextGlobal').addEventListener('click', () => {
+  if ((globalPage + 1) * pageSize < globalRankList.length) { globalPage++; renderGlobalRank() }
+})
+document.getElementById('prevRarity').addEventListener('click', () => {
+  if (rarityPage > 0) { rarityPage--; renderRarityRank() }
+})
+document.getElementById('nextRarity').addEventListener('click', () => {
+  if ((rarityPage + 1) * pageSize < rarityRankList.length) { rarityPage++; renderRarityRank() }
+})
+document.getElementById('prevBlocks').addEventListener('click', () => {
+  if (blockPage > 0) { blockPage--; renderGlobalBlocks() }
+})
+document.getElementById('nextBlocks').addEventListener('click', () => {
+  if ((blockPage + 1) * pageSize < globalBlocksList.length) { blockPage++; renderGlobalBlocks() }
+})
+
+document.querySelectorAll('#tabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+    tab.classList.add('active')
+    document.querySelectorAll('.tabContent').forEach(tc => tc.classList.remove('active'))
+    document.getElementById(tab.dataset.tab).classList.add('active')
+  })
+})
+
+window.addEventListener('load', loadData)
