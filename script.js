@@ -133,7 +133,7 @@ function computeAll() {
 function filterBlocks(query) {
   const q = query.toLowerCase()
   filteredBlocksList = globalBlocksList.filter(b => {
-    const name = (blockIdToName[b.bid] || "").toLowerCase()
+    const name = (blockIdToName[b.bid] || b.bid).toLowerCase()
     return name.includes(q) || b.bid.toLowerCase().includes(q)
   })
 }
@@ -163,12 +163,9 @@ function searchPlayer(query) {
       const count = data.rarities?.[id] || 0
       if (count > 0) html += `<span style="color:${rarityColors[id]}; font-weight:bold;">${rarityNames[id]}: ${format(count)}</span>`
     })
-    html += `</div>`
-    html += `<button class="pagination button" style="margin-top:10px; width:100%;" onclick="toggleMissing('${playerKey}')">Toggle Missing Blocks</button>`
-    html += `<div id="missing-${playerKey}" style="display:none; margin-top:15px; border-top: 1px solid #333; padding-top:15px;"></div>`
-    html += `<div class="search-block-list">`
+    html += `</div><div class="search-block-list">`
     Object.entries(data.blocks || {})
-      .map(([bid, count]) => ({ bid, count, name: blockIdToName[bid] || `Block ${bid}`, rarity: blockIdToRarity[bid] || 0 }))
+      .map(([bid, count]) => ({ bid, count, name: blockIdToName[bid] || bid, rarity: blockIdToRarity[bid] || 0 }))
       .filter(b => b.rarity >= 7)
       .sort((a, b) => b.rarity - a.rarity || b.count - a.count)
       .forEach(b => {
@@ -178,26 +175,6 @@ function searchPlayer(query) {
     html += `</div></div>`
   })
   container.innerHTML = html
-}
-
-window.toggleMissing = (playerKey) => {
-  const div = document.getElementById(`missing-${playerKey}`)
-  if (div.style.display === 'block') {
-    div.style.display = 'none'
-    return
-  }
-  const playerBlocks = players[playerKey].blocks || {}
-  const missing = globalBlocksList.filter(b => !playerBlocks[b.bid])
-  
-  let html = '<h3 style="margin-top:0;">Missing Blocks (R7+)</h3><div class="search-block-list">'
-  missing.forEach(b => {
-    const color = rarityColors[b.rarity] || '#eee'
-    const name = blockIdToName[b.bid] || `Block ${b.bid}`
-    html += `<div class="search-block-item" style="border-left-color: ${color}; opacity: 0.6;"><span style="color:${color}; font-weight:bold;">${name}</span></div>`
-  })
-  html += '</div>'
-  div.innerHTML = html
-  div.style.display = 'block'
 }
 
 function renderTable(id, list, page) {
@@ -220,7 +197,7 @@ function renderGlobalBlocks() {
   const start = blockPage * pageSize
   filteredBlocksList.slice(start, start + pageSize).forEach((b, i) => {
     const tr = document.createElement('tr')
-    const name = blockIdToName[b.bid] || `Block ${b.bid}`
+    const name = blockIdToName[b.bid] || b.bid
     tr.innerHTML = `<td>${start + i + 1}</td><td>${name}</td><td>${rarityNames[b.rarity] || "Common"}</td><td>${format(b.count)}</td>`
     tr.onclick = () => {
       const next = tr.nextSibling
