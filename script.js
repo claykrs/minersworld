@@ -16,9 +16,9 @@ const rarityColors = {
   11: "#808080"
 }
 
-const GITHUB_BASE = "https://raw.githubusercontent.com/claykrs/mw_data/main"
+const mw_data = "https://raw.githubusercontent.com/claykrs/mw_data/refs/heads/main/"
 
-let storeData = {}, players = {}, globalData = {}, blockIdToName = {}, blockIdToRarity = {}
+let storeData = {}, players = {}, globalData = {}, blockIdToName = {}, blockIdToRarity = {}, blockNameToId = {}
 let globalRankList = [], rarityRankList = [], dailyRankList = [], globalBlocksList = [], filteredBlocksList = []
 let pageSize = 100, globalPage = 0, rarityPage = 0, dailyPage = 0, blockPage = 0
 let currentRarity = 7, currentDailyRarity = 7, currentTimeFrame = 1
@@ -30,38 +30,45 @@ function format(n) {
 async function loadData() {
   try {
     const [blockRes, rarityRes] = await Promise.all([
-      fetch(`${GITHUB_BASE}/blockid.json`).then(r => r.json()),
-      fetch(`${GITHUB_BASE}/rarity.json`).then(r => r.json())
-    ])
+      fetch(`${mw_data}/blockid.json`).then(r => r.json()),
+      fetch(`${mw_data}/rarity.json`).then(r => r.json())
+    ]);    
 
-    let fullJson = ""
-    let partIndex = 0
-    
+    let fullJson = "";
+    let partIndex = 0;
+
     while (true) {
       try {
-        const res = await fetch(`${GITHUB_BASE}/chunks/part_${partIndex}`)
-        if (!res.ok) break
-        fullJson += await res.text()
-        partIndex++
-      } catch (e) { break }
+        const res = await fetch(`${mw_data}/chunks/part_${partIndex}`);
+        if (res.status === 404) break;
+        if (!res.ok) throw new Error(`failed to fetch chunk ${partIndex}: ${res.status}`);
+        fullJson += await res.text();
+        partIndex++;
+      } catch (e) {
+        console.error(`error fetching chunk ${partIndex}:`, e.message);
+        break;
+      }
     }
 
-    if (!fullJson) return
-    const dataRes = JSON.parse(fullJson)
+    if (!fullJson) return;
+    const dataRes = JSON.parse(fullJson);
 
-    storeData = dataRes
-    players = dataRes.players || {}
-    globalData = dataRes.global || { total: 0, blocks: {}, rarities: {} }
-    blockIdToName = blockRes
-    blockIdToRarity = rarityRes
+    storeData = dataRes;
+    players = dataRes.players || {};
+    globalData = dataRes.global || { total: 0, blocks: {}, rarities: {} };
+    blockIdToName = blockRes;
+    blockIdToRarity = rarityRes;
 
-    computeAll()
-    renderAll()
+    blockNameToId = {}
+    for (const [id, name] of Object.entries(blockIdToName)) blockNameToId[name] = id
 
-    const searchInput = document.getElementById('playerSearchInput')
-    if (searchInput && searchInput.value) searchPlayer(searchInput.value)
+    computeAll();
+    renderAll();
+
+    const searchInput = document.getElementById('playerSearchInput');
+    if (searchInput && searchInput.value) searchPlayer(searchInput.value);
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
 }
 
@@ -82,7 +89,10 @@ function computeAll() {
   globalRankList = Object.entries(players)
     .map(([username, d]) => ({
       username,
-      count: Object.entries(d.blocks || {}).filter(([bid]) => (blockIdToRarity[bid] || 0) >= 7).reduce((sum, [_, c]) => sum + c, 0)
+      count: Object.entries(d.blocks || {}).filter(([name]) => {
+        const id = blockNameToId[name]
+        return (blockIdToRarity[id] || 0) >= 7
+      }).reduce((sum, [_, c]) => sum + c, 0)
     }))
     .filter(p => p.count > 0)
     .sort((a, b) => b.count - a.count)
@@ -101,7 +111,6 @@ function computeAll() {
     .map(([username, d]) => {
       const dailyBuckets = {}
       const timeLimit = currentTimeFrame * dayMs
-      
       ;(d.discoveries || []).forEach(disc => {
         const discTime = new Date(disc.ts).getTime()
         if (disc.r === currentDailyRarity && (currentTimeFrame === 0 || (now - discTime) <= timeLimit)) {
@@ -109,7 +118,6 @@ function computeAll() {
           dailyBuckets[dateKey] = (dailyBuckets[dateKey] || 0) + 1
         }
       })
-
       const counts = Object.values(dailyBuckets)
       const maxDayCount = counts.length > 0 ? Math.max(...counts) : 0
       return { username, count: maxDayCount }
@@ -119,23 +127,27 @@ function computeAll() {
   applyDenseRank(dailyRankList)
 
   globalBlocksList = Object.entries(globalData.blocks || {})
-    .map(([bid, count]) => ({ bid, count, rarity: blockIdToRarity[bid] || 0 }))
+    .map(([name, count]) => ({ name, count, rarity: 0 }))
+    .map(b => {
+      b.rarity = blockIdToRarity[blockNameToId[b.name]] || 0
+      return b
+    })
     .filter(b => b.count > 0 && b.rarity >= 7)
     .sort((a, b) => b.count - a.count)
   
   filterBlocks("")
 
   globalData.total = Object.entries(globalData.blocks || {})
-    .filter(([bid]) => (blockIdToRarity[bid] || 0) >= 7)
+    .filter(([name]) => {
+      const id = blockNameToId[name]
+      return (blockIdToRarity[id] || 0) >= 7
+    })
     .reduce((sum, [_, c]) => sum + c, 0)
 }
 
 function filterBlocks(query) {
   const q = query.toLowerCase()
-  filteredBlocksList = globalBlocksList.filter(b => {
-    const name = (blockIdToName[b.bid] || b.bid).toLowerCase()
-    return name.includes(q) || b.bid.toLowerCase().includes(q)
-  })
+  filteredBlocksList = globalBlocksList.filter(b => b.name.toLowerCase().includes(q))
 }
 
 function searchPlayer(query) {
@@ -154,7 +166,10 @@ function searchPlayer(query) {
   matches.forEach(playerKey => {
     const data = players[playerKey]
     const totalHighRarity = Object.entries(data.blocks || {})
-      .filter(([bid]) => (blockIdToRarity[bid] || 0) >= 7)
+      .filter(([name]) => {
+        const id = blockNameToId[name]
+        return (blockIdToRarity[id] || 0) >= 7
+      })
       .reduce((sum, [_, count]) => sum + count, 0)
     const gRank = globalRankList.find(p => p.username === playerKey)?.rank || 'N/A'
     
@@ -165,7 +180,10 @@ function searchPlayer(query) {
     })
     html += `</div><div class="search-block-list">`
     Object.entries(data.blocks || {})
-      .map(([bid, count]) => ({ bid, count, name: blockIdToName[bid] || bid, rarity: blockIdToRarity[bid] || 0 }))
+      .map(([name, count]) => {
+        const id = blockNameToId[name]
+        return { name, count, rarity: blockIdToRarity[id] || 0 }
+      })
       .filter(b => b.rarity >= 7)
       .sort((a, b) => b.rarity - a.rarity || b.count - a.count)
       .forEach(b => {
@@ -180,25 +198,27 @@ function searchPlayer(query) {
 function renderTable(id, list, page) {
   const tbody = document.getElementById(id)
   if (!tbody) return
-  tbody.innerHTML = ''
+  const frag = document.createDocumentFragment()
   const start = page * pageSize
   list.slice(start, start + pageSize).forEach(p => {
     const tr = document.createElement('tr')
     tr.className = `player-row rank-${p.rank}`
     tr.innerHTML = `<td>${p.rank}</td><td>${p.username}</td><td>${format(p.count)}</td>`
-    tbody.appendChild(tr)
+    frag.appendChild(tr)
   })
+  tbody.innerHTML = ''
+  tbody.appendChild(frag)
 }
 
 function renderGlobalBlocks() {
   const tbody = document.getElementById('globalBlocksBody')
   if (!tbody) return
-  tbody.innerHTML = ''
+  const frag = document.createDocumentFragment()
   const start = blockPage * pageSize
   filteredBlocksList.slice(start, start + pageSize).forEach((b, i) => {
     const tr = document.createElement('tr')
-    const name = blockIdToName[b.bid] || b.bid
-    tr.innerHTML = `<td>${start + i + 1}</td><td>${name}</td><td>${rarityNames[b.rarity] || "Common"}</td><td>${format(b.count)}</td>`
+    const name = b.name
+    tr.innerHTML = `<td>${start + i + 1}</td><td>${name}</td><td>${rarityNames[b.rarity] || "?"}</td><td>${format(b.count)}</td>`
     tr.onclick = () => {
       const next = tr.nextSibling
       if (next && next.classList.contains('dropdown')) {
@@ -207,7 +227,7 @@ function renderGlobalBlocks() {
         const drop = document.createElement('tr')
         drop.className = 'dropdown'
         const miners = Object.entries(players)
-          .map(([u, d]) => ({ u, c: d.blocks?.[b.bid] || 0 }))
+          .map(([u, d]) => ({ u, c: d.blocks?.[b.name] || 0 }))
           .filter(p => p.c > 0).sort((a, z) => z.c - a.c).slice(0, 10)
         const cell = document.createElement('td')
         cell.colSpan = 4
@@ -217,8 +237,10 @@ function renderGlobalBlocks() {
         tr.after(drop)
       }
     }
-    tbody.appendChild(tr)
+    frag.appendChild(tr)
   })
+  tbody.innerHTML = ''
+  tbody.appendChild(frag)
 }
 
 function renderStats() {
@@ -265,7 +287,11 @@ document.querySelectorAll('.tab').forEach(t => {
     t.classList.add('active')
     const content = document.getElementById(t.dataset.tab)
     if (content) content.classList.add('active')
+    if (t.dataset.tab === 'globalRank') renderTable('globalRankBody', globalRankList, globalPage)
+    else if (t.dataset.tab === 'rarityRank') renderTable('rarityRankBody', rarityRankList, rarityPage)
+    else if (t.dataset.tab === 'dailyLeaderboard') renderTable('dailyLeaderboardBody', dailyRankList, dailyPage)
+    else if (t.dataset.tab === 'blocks') renderGlobalBlocks()
   } 
 })
 
-window.onload = () => { loadData(); setInterval(loadData, 60000) }
+window.onload = () => { loadData(); setInterval(loadData, 10000) }
