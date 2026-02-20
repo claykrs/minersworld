@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>MW Ore Dashboard</title>
-    <link rel="stylesheet" href="style.css?v=<?=Date.now()?">
-    <link rel="icon" href="favicon.ico?v=<?=Date.now()?" type="image/x-icon">
+    <link rel="stylesheet" href="style.css?v=<?=Date.now()?>">
+    <link rel="icon" href="favicon.ico?v=<?=Date.now()?>" type="image/x-icon">
 </head>
 <body>
 <div id="container">
@@ -26,7 +26,6 @@
                 <button id="nextGlobal">Next</button>
             </div>
         </div>
-
         <div id="rarityRank" class="tabContent">
             <select id="raritySelect"></select>
             <table>
@@ -38,7 +37,6 @@
                 <button id="nextRarity">Next</button>
             </div>
         </div>
-
         <div id="dailyLeaderboard" class="tabContent">
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <select id="dailyRaritySelect" style="margin-bottom:0;"></select>
@@ -57,23 +55,39 @@
                 <button id="nextDaily">Next</button>
             </div>
         </div>
-
         <div id="globalBlocks" class="tabContent">
-            <input type="text" id="blockSearchInput" placeholder="Search blocks..." 
-            style="width: 100%; padding: 10px; margin-bottom: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box;">
-            <table>
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+              <button id="globalBlocks_tab_global" class="subtab active">Global</button>
+              <button id="globalBlocks_tab_incoming" class="subtab">Incoming</button>
+              <input id="blockSearchInput" type="text" placeholder="Search blocks..."
+                style="flex:1; padding: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box">
+            </div>
+          
+            <div id="globalBlocksContainer">
+              <table>
                 <thead><tr><th>#</th><th>Block</th><th>Rarity</th><th>Total Mined</th></tr></thead>
                 <tbody id="globalBlocksBody"></tbody>
-            </table>
-            <div class="pagination">
+              </table>
+              <div class="pagination">
                 <button id="prevBlocks">Prev</button>
                 <button id="nextBlocks">Next</button>
+              </div>
             </div>
-        </div>
-
+          
+            <div id="incomingContainer" style="display:none;">
+              <table>
+                <thead><tr><th>#</th><th>Username</th><th>Rarity</th><th>Block</th><th>Timestamp</th></tr></thead>
+                <tbody id="incomingBody"></tbody>
+              </table>
+              <div class="pagination">
+                <button id="prevIncoming">Prev</button>
+                <button id="nextIncoming">Next</button>
+              </div>
+            </div>
+          </div>
         <div id="playerSearch" class="tabContent">
             <input type="text" id="playerSearchInput" placeholder="Search username..."
-            style="width: 100%; padding: 10px; margin-bottom: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box;">
+            style="width: 100%; padding: 10px; margin-bottom: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box">
             <div id="playerSearchResult"></div>
         </div>
     </div>
@@ -82,6 +96,9 @@
         <div id="statsContent"></div>
     </div>
 </div>
+
+<div id="lastUpdate"></div>
+
 <script src="script.js?v=<?=Date.now()?>"></script>
 </body>
 </html>
